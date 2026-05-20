@@ -1,0 +1,76 @@
+---
+const { ...rest } = Astro.props
+---
+<header class="rvt-header-wrapper" {...rest}>
+    <!-- Hidden link for keyboard users to skip to main content -->
+    <!-- <a class="rvt-header-wrapper__skip-link" href="#main-content">Skip to main content</a> -->
+    <!-- Primary header area -->
+    <div class="rvt-header-global">
+        <div class="rvt-container-xl">
+        <div class="rvt-header-global__inner">
+            <div class="rvt-header-global__logo-slot">
+            <div class="rvt-lockup">
+                <!-- Trident logo -->
+                <div class="rvt-lockup__tab">
+                <svg xmlns="http://www.w3.org/2000/svg" class="rvt-lockup__trident" viewBox="0 0 28 34">
+                    <path d="M-3.34344e-05 4.70897H8.83308V7.174H7.1897V21.1426H10.6134V2.72321H8.83308V0.121224H18.214V2.65476H16.2283V21.1426H19.7889V7.174H18.214V4.64047H27.0471V7.174H25.0614V23.6761L21.7746 26.8944H16.2967V30.455H18.214V33.8787H8.76463V30.592H10.6819V26.8259H5.20403L1.91726 23.6077V7.174H-3.34344e-05V4.70897Z" fill="currentColor"></path>
+                </svg>
+                </div>
+                <!-- Website or application title -->
+                <div class="rvt-lockup__body">
+                    <span class="rvt-lockup__title">Libraries</span>
+                    <span class="rvt-lockup__subtitle">LibGuides Accessibility Tool</span>
+                </div>
+            </div>
+            </div>
+            <!-- Header controls -->
+            <div class="rvt-header-global__controls">
+
+
+            <!-- Controls for Moving Tool -->
+            <button class="rvt-global-toggle" title="Minimise Tool">
+                <span class="rvt-sr-only">Minimise Tool</span>
+                <svg aria-hidden="true" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M15 9H1V7h14v2Z"></path></svg>
+            </button>
+
+            <button class="rvt-global-toggle" data-snap title="Snap Tool to Side">
+                <span class="rvt-sr-only">Snap Tool to Side</span>
+                <svg aria-hidden="true" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M10.586 4H4V2h10v10h-2V5.414l-8.293 8.293-1.414-1.414L10.586 4Z"></path></svg>
+            </button>
+
+            <button class="rvt-global-toggle" title="Close Tool">
+                <span class="rvt-sr-only">Close Tool</span>
+                <svg aria-hidden="true" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"></path></svg>
+            </button>
+            </div>
+        </div>
+        </div>
+    </div>
+</header>
+
+
+<style>
+
+    header {
+        cursor: move;
+        z-index: 2000000001;
+    }
+
+    .rvt-lockup__title, .rvt-lockup__subtitle {
+        text-overflow: ellipsis;
+        white-space:nowrap;
+        overflow:hidden;
+    }
+
+    .rvt-lockup__subtitle {
+        font-size: .75rem;
+    }
+
+    .rvt-header-global__controls {
+        gap: 8px;
+    }
+
+    .rvt-global-toggle {
+        margin: 0!important;
+    }
+</style>

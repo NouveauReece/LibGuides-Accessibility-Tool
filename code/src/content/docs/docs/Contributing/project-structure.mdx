@@ -1,0 +1,53 @@
+---
+title: Codebase Structure
+---
+
+## Directories
+The codebase separates the bookmarklet code, documentation code, and notes into different directories.
+* `./code/src/bookmarklet`: source code for the accessibility tool (a bookmarklet)
+* `./code/src/content/docs`: markdown files for documentation
+* `./notes`: accessibility and implementation notes
+
+Here's a directory tree for reference (some files were removed for clarity):
+```
+.
+├── code
+│   └── src
+│       ├── bookmarklet
+│       └── content/docs
+└── notes
+```
+
+## Config Files
+Additionally, there are different config files:
+* `vite.bookmarklet.config.mjs`: vite build config for bookmarklet only
+* `astro.config.mjs`: astro build config for documentation, any non-bookmarklet content
+* `tsconfig.json`: typescript config
+* `package.json`: npm dependencies and scripts
+
+```
+.
+├── code
+│   ├── astro.config.mjs
+│   ├── vite.bookmarklet.config.mjs
+│   ├── tsconfig.json
+│   └── package.json
+│       
+└── notes
+```
+
+## Output Build Directories 
+Additionally, the output files and directories are (intuitively) dependent on what is being built:
+* `dist-bookmarklet/bookmarklet.js`: the raw JS bookmarklet bundle
+* `dist-bookmarklet/bookmarklet.txt`: the `javascript:` prefixed string for pasting into the bookmark URL
+* `dist`: the output directory for documentation/non-bookmarklet content
+
+```
+.
+├── code
+│   ├── dist-bookmarklet
+│   │   ├── bookmarklet.js
+│   │   └── bookmarklet.txt
+│   └── dist
+└── notes
+```
