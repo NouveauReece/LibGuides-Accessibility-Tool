@@ -1,24 +1,11 @@
-const selectors = {
-    "box" : `[class^='s-lg-box-wrapper-']`,
-    "regular-box" : `[class^='s-lg-box-wrapper-']:not(:has(.s-lib-jqtabs)):not(:has(.s-lib-profile-container))`,
-    "tab-box" : `[class^='s-lg-box-wrapper-']:has(.s-lib-jqtabs)`,
-    "profile-box" : `[class^='s-lg-box-wrapper-']:has(.s-lib-profile-container)`,
-    "gallery-box" : `[class^='s-lg-box-wrapper-']:has([class^="slick"])`,
-    "link-list" : `div:has(>.s-lg-link-list)`,
-    "database" : `div:has(>.s-lg-link-list .s-lg-database)`,
-    "media" : `.s-lg-widget`,
-    "catalog" : `div:has(>.s-lg-link-list .s-lg-book)`,
-    "document" : `div:has(>.s-lg-link-list .s-lg-file-desc)`,
-    "rss" : `.s-lg-rss`,
-    "guide-list" : `div:has(>.s-lg-system-list s-lg-guide-list)`,
-    "poll" : `.s-lg-poll-outer, .s-lg-poll`,
-    "google-search" : `div:has(>[id^="google_"])`,
-    "add-box-btn" : `.s-lg-admin-addbox`,
-    "edit-btns" : `[id^="s-lg-admin-edit"]`
-}
-
-
-// Input should be reference to a variable who's value will represent the progress
+/**
+ * Returns an array of page objects with properties:
+ *      title - page title
+ *      container - the guide's main container/element
+ *      current - whether it's the current page
+ *      image - url of the first image featured on the page
+ *      url - page url
+ */
 export async function getPages() {
     let pages = [...document.querySelectorAll('[aria-label="Guide Pages"] li a:not([id^="s-lg-admin"])')]
     .map((link) => ({
@@ -74,35 +61,24 @@ export async function getPages() {
 
         return { ...page, container, image }
     }))
-
     return pages;
 }
 
-
-export async function scanPages(pages) {
-    try {
-        const axeOptions = {
-            runOnly: ['wcag2a', 'wcag2aa', 'best-practice'],
-            rules: {
-                'color-contrast-enhanced': { enabled: true },
-                'hidden-content': { enabled: true },
-                'label-content-name-mismatch': { enabled: true },
-                'p-as-heading': { enabled: true },
-                'table-fake-caption': { enabled: true },
-                'td-has-header': { enabled: true }
-            },
-            resultTypes: ['violations']
-        }
-
-        const results = []
-        for (const page of pages) {
-            const axeResults = await axe.run(page.container, axeOptions);
-            results.push({ ...page, violations: axeResults.violations })
-        }
-
-        return results
-    } catch (err) {
-        console.error('[ERROR] scanPages failed:', err);
-        console.error('[ERROR] Stack:', err.stack);
-    }
+const selectors = {
+    "box" : `[class^='s-lg-box-wrapper-']`,
+    "regular-box" : `[class^='s-lg-box-wrapper-']:not(:has(.s-lib-jqtabs)):not(:has(.s-lib-profile-container))`,
+    "tab-box" : `[class^='s-lg-box-wrapper-']:has(.s-lib-jqtabs)`,
+    "profile-box" : `[class^='s-lg-box-wrapper-']:has(.s-lib-profile-container)`,
+    "gallery-box" : `[class^='s-lg-box-wrapper-']:has([class^="slick"])`,
+    "link-list" : `div:has(>.s-lg-link-list)`,
+    "database" : `div:has(>.s-lg-link-list .s-lg-database)`,
+    "media" : `.s-lg-widget`,
+    "catalog" : `div:has(>.s-lg-link-list .s-lg-book)`,
+    "document" : `div:has(>.s-lg-link-list .s-lg-file-desc)`,
+    "rss" : `.s-lg-rss`,
+    "guide-list" : `div:has(>.s-lg-system-list s-lg-guide-list)`,
+    "poll" : `.s-lg-poll-outer, .s-lg-poll`,
+    "google-search" : `div:has(>[id^="google_"])`,
+    "add-box-btn" : `.s-lg-admin-addbox`,
+    "edit-btns" : `[id^="s-lg-admin-edit"]`
 }

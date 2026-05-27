@@ -1,46 +1,61 @@
-async function startScan(multiPage) {
-    document.getElementById('a11y-results').innerHTML = '<div style="text-align:center;padding:40px;">⏳ Scanning...</div>';
+import { trackScanCompleted } from './analytics.js';
+
+export async function scanPages(pages) {
     try {
-      if (multiPage) {
-        // wait for libguides to load navigatin
-        await new Promise(r => setTimeout(r, 500));
-        window.scrollBy(0, 100);
-        window.scrollBy(0, -100);
-        await new Promise(r => setTimeout(r, 300));
+        const axeOptions = {
+            runOnly: ['wcag2a', 'wcag2aa', 'best-practice'],
+            iframes: false,
+            rules: {
+                'color-contrast-enhanced': { enabled: true },
+                'hidden-content': { enabled: true },
+                'label-content-name-mismatch': { enabled: true },
+                'p-as-heading': { enabled: true },
+                'table-fake-caption': { enabled: true },
+                'td-has-header': { enabled: true }
+            },
+            resultTypes: ['violations']
+        }
 
-        const pages = discoverGuidePages();
-        const results = await scanMultiplePages(pages);
-        displayMultiPageResults(results);
-      } else {
-        const container = findLibGuidesContainer();
+        const results = []
+        for (const page of pages) {
+            const axeResults = await axe.run(page.container, axeOptions);
+            results.push({ ...page, violations: axeResults.violations })
+        }
 
-        // HIDE ADMIN ELEMENTS BEFORE SCANNING
-        // const adminElements = container.querySelectorAll('.s-lg-content-edit, .s-lg-box-edit, .s-lib-box-edit, [class*="s-lg-edit"], [class*="s-lib-edit"]');
-        const adminElements = container.querySelectorAll('.s-lg-content-edit, .s-lg-box-edit, .s-lib-box-edit, [id*="admin-edit"], .dropdown-toggle');
-        adminElements.forEach(el => el.style.display = 'none');
+        // Track scan completion analytics
+        try {
+            const violationsByImpact = {
+                critical: 0,
+                serious: 0,
+                moderate: 0,
+                minor: 0,
+                check: 0
+            };
+            
+            results.forEach(page => {
+                page.violations.forEach(violation => {
+                    const impact = violation.impact?.toLowerCase() || 'unknown';
+                    if (impact in violationsByImpact) {
+                        violationsByImpact[impact]++;
+                    }
+                });
+            });
+            
+            const currentPage = results.find(p => p.current);
+            
+            trackScanCompleted({
+                violationsByImpact,
+                pageCount: results.length,
+                guideTitle: currentPage?.title || 'unknown',
+                guideUrl: window.location.href
+            });
+        } catch (analyticsError) {
+            console.warn('[LAT] Analytics tracking failed:', analyticsError);
+        }
 
-        const axeResults = await axe.run(container, {
-            runOnly: ['wcag2a', 'wcag2aa', 'best-practice'], 
-            resultTypes: ['violations']});
-        
-        // RESTORE ADMIN ELEMENTS
-        adminElements.forEach(el => el.style.display = '');
-
-        const filteredAxeViolations = axeResults.violations.filter(v => 
-            v.id !== 'empty-heading' 
-            && v.id !== 'heading-order'
-            && v.id !== 'duplicate-id' 
-            && v.id !== 'scope-attr-valid'
-            && v.id !== 'image-alt'
-            && v.id !== 'frame-title'
-            && v.id !== 'th-has-data-cells'
-            && v.id !== 'label-content-name-mismatch' 
-            && v.id !== 'page-has-heading-one'
-        );
-
-        displaySinglePageResults({ violations: [...filteredAxeViolations, ...runCustomChecks(container)] });
-      }
+        return results
     } catch (err) {
-      document.getElementById('a11y-results').innerHTML = `<div style="color:#dc3545;background:#f8d7da;padding:20px;border-radius:8px;border:1px solid #f5c6cb;"><strong>Error:</strong> ${err.message}<br><br><small>Check browser console for details.</small></div>`;
+        console.error('[ERROR] scanPages failed:', err);
+        console.error('[ERROR] Stack:', err.stack);
     }
-  }
+}

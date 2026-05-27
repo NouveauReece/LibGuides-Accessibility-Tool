@@ -1,0 +1,165 @@
+---
+import PageLayout from "../layouts/PageLayout.astro"
+import CONFIG from '../../bookmarklet/config.json' with { type: 'json' };
+import Image from "astro/components/Image.astro";
+
+import graduating from "../assets/graduating.webp";
+import toolScreenshot from "../assets/bookmarklet.webp";
+---
+
+<PageLayout title="Home">
+
+
+<main id="main-content" class="rvt-layout__wrapper">
+
+    <!-- **********************************************************************
+        Hero
+    *********************************************************************** -->
+
+    <div class="rvt-hero">
+        <div class="rvt-container-lg">
+            <div class="rvt-hero__inner">
+                <div class="rvt-hero__body [ rvt-flow ]">
+                    <span class="rvt-hero__eyebrow">Library Guides</span>
+                    <h1 class="rvt-hero__title">Your LibGuides, Accessible in a Flash</h1>
+                    <div class="rvt-hero__teaser">
+                        <p>Uncover ways you can make your LibGuides more accessible in just a few clicks.</p>
+                    </div>
+                    <div class="rvt-hero__actions">
+                        <a class="rvt-cta rvt-cta--button rvt-bg-blue rvt-border-all-none" href="/install">Install {CONFIG.title}</a>
+                    </div>
+                </div>
+                <div class="rvt-hero__media">
+                    <img src="/favicon.svg" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rvt-container-lg rvt-p-tb-xl rvt-p-tb-3-xl-md-up">
+        <div class="rvt-billboard rvt-billboard--reverse">
+            <div class="rvt-billboard__image">
+                <Image src={toolScreenshot} alt="Screenshot of the LibGuides Accessibility Tool showing a critical accessibility violation on a Guide home page"></Image>
+            </div>
+            <div class="rvt-billboard__body">
+                <h2 class="rvt-billboard__title">Get Started</h2>
+                <div class="rvt-billboard__content [ rvt-flow ]">
+                    <p>The {CONFIG.title} lives directly in your web browser's bookmarks bar. Just click to check for accessibility violations. And installing is as simple as drag-and-drop.</p>
+                    <a class="rvt-cta" href="/install">Install Tool</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="rvt-container-lg rvt-p-tb-lg">
+        <div class="rvt-row">
+            <div class="rvt-cols-4-md">
+                <div class="rvt-card">
+                <div class="rvt-card__image">
+                    <img src="https://rivet.iu.edu/img/placeholder/list-card-3.webp" alt="Smiling students sitting outside on a bench">
+                </div>
+                <div class="rvt-card__body">
+                    <h2 class="rvt-card__title">
+                    <a href="/install">How to Install</a>
+                    </h2>
+                    <div class="rvt-card__content [ rvt-flow ]">
+                    <p>Get started by adding the tool as a bookmarklet to your browser</p>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="rvt-cols-4-md">
+                <div class="rvt-card">
+                <div class="rvt-card__image">
+                    <img src="https://rivet.iu.edu/img/placeholder/list-card-1.webp" alt="Replace this value with appropriate alternative text">
+                </div>
+                <div class="rvt-card__body">
+                    <h2 class="rvt-card__title">
+                    <a href="/docs">How to Use</a>
+                    </h2>
+                    <div class="rvt-card__content [ rvt-flow ]">
+                    <p>Learn the basics of detecting and resolving accessibility violations</p>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="rvt-cols-4-md">
+                <div class="rvt-card">
+                <div class="rvt-card__image">
+                    <img src="https://rivet.iu.edu/img/placeholder/list-card-5.webp" alt="Replace this value with appropriate alternative text">
+                </div>
+                <div class="rvt-card__body">
+                    <h2 class="rvt-card__title">
+                    <a href="/feedback">Give Feedback</a>
+                    </h2>
+                    <div class="rvt-card__content [ rvt-flow ]">
+                    <p>We'd love to hear how we can better empower you to make accessible LibGuides!</p>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rvt-container-lg rvt-p-tb-xl rvt-p-tb-3-xl-md-up">
+        <div class="rvt-billboard">
+            <div class="rvt-billboard__image">
+                <Image src={graduating} alt="A person in graduation robes walks with a golden retriever in the graduation procession"></Image>
+            </div>
+            <div class="rvt-billboard__body">
+                <h2 class="rvt-billboard__title">Accessibility is Bigger than Building Websites</h2>
+                <div class="rvt-billboard__content [ rvt-flow ]">
+                    <p>Accessibility may seem to be remediating your content to meet minimum required policy. But inclusion is more than including everyone. It means everyone feels they belong: that everyone is valued and respected. Discover how you can encourage accessibility and inclusivity beyond your LibGuides.</p>
+                    <a class="rvt-cta" href="https://accessibility.iu.edu/understanding-accessibility/talking-about-disability/index.html">
+                    Understanding Accessibility and Disability
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</main>
+
+
+    
+</PageLayout>
+
+
+<style>
+
+    .rvt-hero__media img {
+        object-fit: fill;
+    }
+
+    .rvt-hero {
+        background: radial-gradient(80.99% 100% at 50% 0%, rgb(128, 128, 128) 0%, rgb(91, 91, 128) 100%), radial-gradient(50% 123.47% at 50% 50%, rgb(239, 231, 200) 0%, rgb(91, 91, 128) 100%), linear-gradient(301.28deg, rgb(128, 190, 255) 0%, rgb(178, 228, 208) 100%), linear-gradient(294.84deg, rgb(178, 180, 228) 0%, rgb(180, 128, 180) 100%), linear-gradient(52.29deg, rgb(0, 0, 0) 0%, rgb(128, 255, 178) 100%), radial-gradient(100% 138.69% at 100% 0%, rgb(64, 64, 165) 0%, rgb(228, 140, 64) 100%), radial-gradient(70.41% 100% at 50% 0%, rgb(190, 178, 64) 0%, rgb(80, 64, 170) 100%);
+        background-blend-mode: screen, screen, lighten, overlay, lighten, difference, normal;
+    }
+
+
+    .rvt-stat__number {
+        --bg: #c6ecf6;
+        --color: #006298;
+        --fill: #fff;
+        width: 5rem!important;
+        height: 5rem;
+        align-items: center;
+        display: inline-flex;
+        height: min-content;
+        justify-content: center;
+        width: min-content;
+
+        svg {
+            background-color: var(--bg, var(--color-black-100));
+            border-radius: 100%;
+            color: var(--color, var(--color-black-500));
+            content: "";
+            display: block;
+            flex-shrink: 0;
+            height: var(--size);
+            width: var(--size);
+        }
+    }
+</style>

@@ -18,7 +18,7 @@ class Loading extends LitElement {
 		return html`
 			<div class="rvt-font-sans rvt-flex rvt-flex-column rvt-justify-center rvt-items-center rvt-p-tb-xxl">
 				<div class="rvt-loader rvt-loader--md" aria-busy="true" aria-labelledby="loading-message"></div>
-				<p id="loading-message" class="rvt-font-sans">${this.message}</p>
+				<p id="loading-message" class="rvt-font-sans rvt-m-top-sm">${this.message}</p>
 			</div>
 		`;
 	}

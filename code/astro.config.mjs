@@ -4,7 +4,8 @@ import starlight from '@astrojs/starlight'; // Documentation
 
 // https://astro.build/config
 export default defineConfig({
-  outDir: 'dist',
+  srcDir: './src/website',
+  outDir: 'dist-website',
   integrations: [
     starlight({
       title: 'LibGuides Accessibility Tool Docs',

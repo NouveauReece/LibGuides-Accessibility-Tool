@@ -1,8 +1,13 @@
 import { LitElement, html, css, nothing } from "lit";
-import { choose } from 'lit/directives/choose.js';
-import { until } from 'lit/directives/until.js';
-import { getPages, scanPages } from '../logic/utils.js';
-import { RULE_DEFINITIONS } from '../rules/ruleDescriptions.js';
+import CONFIG from '../config.json' assert { type: 'json' };
+import { getPages } from '../logic/utils.js';
+import { scanPages } from '../logic/scan.js'
+import { isUpdateAvailable, getLatestVersionInfo } from '../logic/updater.js';
+import { getUserIdentifier } from '../logic/userIdentification.js';
+import { initializeAnalytics, trackBookmarkletOpened } from '../logic/analytics.js';
+import { renderHubView } from './HubView.js';
+import { renderDetailView } from './DetailView.js';
+import { renderUpdateView } from './UpdateView.js';
 import "./PrimaryNav.js";
 import "./Loading.js";
 import "./SmartBadge.js";
@@ -19,6 +24,9 @@ class BookmarkletFrame extends LitElement {
         _loadedPages: { type: Boolean, state: true },
 		_minimised: { type: Boolean, state: true },
 		_selectedPage: { type: Object, state: true },
+		_updateAvailable: { type: Boolean, state: true },
+		_latestVersionInfo: { type: Object, state: true },
+		_userIdentifier: { type: Object, state: true },
 	};
 
 	constructor() {
@@ -36,24 +44,19 @@ class BookmarkletFrame extends LitElement {
 		this._isScanning = false;
 		this._selectedPage = null;
 		this._initialViolationCounts = new Map(); // Track initial violation counts for resolved tracking
+		this._latestVersionInfo = null;
+		this._updateAvailable = null;
+		this._userIdentifier = null;
 	}
 
 	static styles = css`
 		@keyframes slideIn {
-			from {
-				transform: translateX(100%);
-			}
-			to {
-				transform: translateX(0);
-			}
+			from { transform: translateX(100%); }
+			to { transform: translateX(0); }
 		}
 		@keyframes slideOut {
-			from {
-				transform: translateX(0);
-			}
-			to {
-				transform: translateX(100%);
-			}
+			from { transform: translateX(0); }
+			to { transform: translateX(100%); }
 		}
 
 		:host {
@@ -81,9 +84,7 @@ class BookmarkletFrame extends LitElement {
 		}
 
 		@media (max-width: 768px) {
-			:host {
-				width: 100%;
-			}
+			:host { width: 100%; }
 		}
 
 		header {
@@ -94,13 +95,17 @@ class BookmarkletFrame extends LitElement {
 		main {
 			overflow-y: auto;
 			overflow-x: none;
-			max-height: calc(100svh - 75px);
+			max-height: calc(100svh - 150px);
 
 			h2 {
 				margin-top: 30px;
 				padding-left: 14px;
 				font-size: 24px;
 			}
+		}
+
+		p {
+			margin: 0;
 		}
 
 		.rvt-lockup__title,
@@ -125,6 +130,10 @@ class BookmarkletFrame extends LitElement {
 		.rvt-link-hub__link {
 			display: table-row;
 			max-width: 100%;
+		}
+
+		.rvt-footer-base__link {
+			text-decoration: underline;
 		}
 
 		table:not(.charts-css) {
@@ -169,8 +178,6 @@ class BookmarkletFrame extends LitElement {
 				font-weight: 400;
 			}
 		}
-
-		
 	`;
 
 	async connectedCallback() {
@@ -181,13 +188,31 @@ class BookmarkletFrame extends LitElement {
 			style.textContent = `@font-face {font-family: BentonSans;font-style: normal;font-weight: 400;src: url("https://fonts.iu.edu/fonts/benton-sans-regular.eot");src: url("https://fonts.iu.edu/fonts/benton-sans-regular.eot?#iefix") format("embedded-opentype"), url("https://fonts.iu.edu/fonts/benton-sans-regular.woff") format("woff"), url("https://fonts.iu.edu/fonts/benton-sans-regular.ttf") format("truetype"), url("https://fonts.iu.edu/fonts/benton-sans-regular.svg#BentonSansRegular") format("svg");font-display: swap;}@font-face {font-family: BentonSans;font-style: italic;font-weight: 400;src: url("https://fonts.iu.edu/fonts/benton-sans-italic.eot");src: url("https://fonts.iu.edu/fonts/benton-sans-italic.eot?#iefix") format("embedded-opentype"), url("https://fonts.iu.edu/fonts/benton-sans-italic.woff") format("woff"), url("https://fonts.iu.edu/fonts/benton-sans-italic.ttf") format("truetype"), url("https://fonts.iu.edu/fonts/benton-sans-italic.svg#BentonSansItalic") format("svg");font-display: swap;}@font-face {font-family: BentonSans;font-style: normal;font-weight: 500;src: url("https://fonts.iu.edu/fonts/benton-sans-medium.eot");src: url("https://fonts.iu.edu/fonts/benton-sans-medium.eot?#iefix") format("embedded-opentype"), url("https://fonts.iu.edu/fonts/benton-sans-medium.woff") format("woff"), url("https://fonts.iu.edu/fonts/benton-sans-medium.ttf") format("truetype"), url("https://fonts.iu.edu/fonts/benton-sans-medium.svg#BentonSansMedium") format("svg");font-display: swap;}@font-face {font-family: BentonSans;font-style: normal;font-weight: 700;src: url("https://fonts.iu.edu/fonts/benton-sans-bold.eot");src: url("https://fonts.iu.edu/fonts/benton-sans-bold.eot?#iefix") format("embedded-opentype"), url("https://fonts.iu.edu/fonts/benton-sans-bold.woff") format("woff"), url("https://fonts.iu.edu/fonts/benton-sans-bold.ttf") format("truetype"), url("https://fonts.iu.edu/fonts/benton-sans-bold.svg#BentonSansBold") format("svg");font-display: swap;}@font-face {font-family: GeorgiaPro;font-style: normal;font-weight: 400;src: url("https://fonts.iu.edu/fonts/georgia-pro-regular.eot");src: url("https://fonts.iu.edu/fonts/georgia-pro-regular.eot?#iefix") format("embedded-opentype"), url("https://fonts.iu.edu/fonts/georgia-pro-regular.woff") format("woff"), url("https://fonts.iu.edu/fonts/georgia-pro-regular.ttf") format("truetype"), url("https://fonts.iu.edu/fonts/georgia-pro-regular.svg#GeorgiaProRegular") format("svg");font-display: swap;}@font-face {font-family: GeorgiaPro;font-style: italic;font-weight: 400;src: url("https://fonts.iu.edu/fonts/georgia-pro-italic.eot");src: url("https://fonts.iu.edu/fonts/georgia-pro-italic.eot?#iefix") format("embedded-opentype"), url("https://fonts.iu.edu/fonts/georgia-pro-italic.woff") format("woff"), url("https://fonts.iu.edu/fonts/georgia-pro-italic.ttf") format("truetype"), url("https://fonts.iu.edu/fonts/georgia-pro-italic.svg#GeorgiaProItalic") format("svg");font-display: swap;}@font-face {font-family: GeorgiaPro;font-style: normal;font-weight: 700;src: url("https://fonts.iu.edu/fonts/georgia-pro-bold.eot");src: url("https://fonts.iu.edu/fonts/georgia-pro-bold.eot?#iefix") format("embedded-opentype"), url("https://fonts.iu.edu/fonts/georgia-pro-bold.woff") format("woff"), url("https://fonts.iu.edu/fonts/georgia-pro-bold.ttf") format("truetype"), url("https://fonts.iu.edu/fonts/georgia-pro-bold.svg#GeorgiaProBold") format("svg");font-display: swap;}@font-face {font-family: GeorgiaPro;font-style: italic;font-weight: 700;src: url("https://fonts.iu.edu/fonts/georgia-pro-bold-italic.eot");src: url("https://fonts.iu.edu/fonts/georgia-pro-bold-italic.eot?#iefix") format("embedded-opentype"), url("https://fonts.iu.edu/fonts/georgia-pro-bold-italic.woff") format("woff"), url("https://fonts.iu.edu/fonts/georgia-pro-bold-italic.ttf") format("truetype"), url("https://fonts.iu.edu/fonts/georgia-pro-bold-italic.svg#GeorgiaProBoldItalic") format("svg");font-display: swap;}`;
 			document.head.appendChild(style);
 		}
-
 		window.addEventListener("resize", this._onResize);
+
+		// init
+		this._initTool();
 		this._performScan();
 	}
 
+	async _initTool() {
+		try {
+			console.clear();
+			this._userIdentifier = await getUserIdentifier();
+			this._latestVersionInfo = await getLatestVersionInfo();
+			this._updateAvailable = isUpdateAvailable(this._latestVersionInfo);
+			const gaId = this._latestVersionInfo?.gaId || 'G-XXXXXXXXXX';
+			initializeAnalytics(gaId, this._userIdentifier);
+			trackBookmarkletOpened();
+			const welcomeLogStyle = 'border-left: 5px solid #900; color: white; padding: 5px 10px;';
+			console.log(`%c${CONFIG.title}\nVersion: ${CONFIG.version}\nGA: ${gaId}\nUser: ${this._userIdentifier.value}\nNeed Help? Contact ${CONFIG.maintainer}\nWith 💜 and 🦆, DUX`, welcomeLogStyle)
+		} catch (error) {
+			console.error('[LAT] Initialization error:', error);
+		}
+	}
+
 	async _performScan() {
-		if (this._isScanning || this._scanResults) return;
+		if (this._isScanning || this._scanResults || this._updateAvailable) return;
 		this._isScanning = true;
 		this._axeLoaded = false;
 		try {
@@ -269,17 +294,11 @@ class BookmarkletFrame extends LitElement {
 		.then(async (axe) => { 
 			this.axe = axe;
 			const p = await getPages();
-			console.log(p);
 			const r = await scanPages(p);
-			console.log(r);
 			return r;
 		})
 		.catch((e) => { throw console.error(e) })
 	};
-
-	async _updateAvailable() {
-		return false
-	}
 
 	_selectPage(page) {
 		this._selectedPage = page;
@@ -316,6 +335,13 @@ class BookmarkletFrame extends LitElement {
 
 		if (firstElement) {
 			firstElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		}
+
+		// Track violation view in analytics
+		try {
+			trackViolationViewed(violation);
+		} catch (error) {
+			console.warn('[LAT] Failed to track violation view:', error);
 		}
 	}
 
@@ -391,10 +417,6 @@ class BookmarkletFrame extends LitElement {
 	render() {
 		return html`
 
-            <!-- ADD TRACKING -->
-
-            <!-- ADD LOGIC FOR SEEING IF THERE'S A NEW VERSION OF TOOL -->
-
 			<link rel="stylesheet" href="https://unpkg.com/rivet-core@latest/css/rivet.min.css" @load=${() => { this._stylesLoaded = true }}/>
 			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.css" />
 
@@ -412,7 +434,7 @@ class BookmarkletFrame extends LitElement {
 									</div>
 									<div class="rvt-lockup__body">
 										<span class="rvt-lockup__title">Libraries</span>
-										<span class="rvt-lockup__subtitle">LibGuides Accessibility Tool</span>
+										<span class="rvt-lockup__subtitle">${CONFIG.title}</span>
 									</div>
 								</div>
 							</div>
@@ -448,290 +470,66 @@ class BookmarkletFrame extends LitElement {
 				</div>
 			</header>
 
-			<main>
+			<main aria-live="polite" aria-atomic="true">
 
-				<!-- BODY -->
-				 ${this._minimised ? nothing : this._selectedPage ? this._renderDetailView() : this._renderHubView() }
+				${!this._updateAvailable ? this._renderUpdateView() : 
+					this._minimised ? nothing : 
+					this._selectedPage ? this._renderDetailView() : 
+					this._renderHubView()
+				}
 
 			</main>
+
+			<footer class="rvt-footer-base rvt-footer-base--light rvt-flex rvt-items-start"	>
+				<div class="rvt-flex rvt-items-start">
+					<div class="rvt-p-lr-md rvt-footer-base__inner" style="gap: 10px;">
+						<div class="rvt-footer-base__logo">
+							<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 48 48"><g fill="none"><path fill="url(#SVGurBoqbnc)" fill-rule="evenodd" d="M13.1 7.278a5.247 5.247 0 0 1 6.95-2.844l2.946 1.277c.69.299 1.472.302 2.164.01l2.958-1.253a5.247 5.247 0 0 1 6.924 2.903l1.18 2.987a2.75 2.75 0 0 0 1.524 1.536l2.976 1.207a5.247 5.247 0 0 1 2.844 6.948l-1.277 2.947a2.75 2.75 0 0 0-.01 2.164l1.253 2.958a5.247 5.247 0 0 1-2.903 6.924l-2.987 1.18a2.75 2.75 0 0 0-1.536 1.524l-1.207 2.976a5.247 5.247 0 0 1-6.948 2.844l-2.947-1.277a2.75 2.75 0 0 0-2.164-.01l-2.958 1.252a5.247 5.247 0 0 1-6.924-2.902l-1.18-2.987a2.75 2.75 0 0 0-1.524-1.536l-2.976-1.207a5.247 5.247 0 0 1-2.844-6.948l1.277-2.947c.299-.69.302-1.472.01-2.164l-1.253-2.958a5.247 5.247 0 0 1 2.903-6.924l2.987-1.18a2.75 2.75 0 0 0 1.536-1.524z" clip-rule="evenodd"/><path fill="url(#SVGuGDwKeby)" fill-opacity="0.7" fill-rule="evenodd" d="M13.1 7.278a5.247 5.247 0 0 1 6.95-2.844l2.946 1.277c.69.299 1.472.302 2.164.01l2.958-1.253a5.247 5.247 0 0 1 6.924 2.903l1.18 2.987a2.75 2.75 0 0 0 1.524 1.536l2.976 1.207a5.247 5.247 0 0 1 2.844 6.948l-1.277 2.947a2.75 2.75 0 0 0-.01 2.164l1.253 2.958a5.247 5.247 0 0 1-2.903 6.924l-2.987 1.18a2.75 2.75 0 0 0-1.536 1.524l-1.207 2.976a5.247 5.247 0 0 1-6.948 2.844l-2.947-1.277a2.75 2.75 0 0 0-2.164-.01l-2.958 1.252a5.247 5.247 0 0 1-6.924-2.902l-1.18-2.987a2.75 2.75 0 0 0-1.524-1.536l-2.976-1.207a5.247 5.247 0 0 1-2.844-6.948l1.277-2.947c.299-.69.302-1.472.01-2.164l-1.253-2.958a5.247 5.247 0 0 1 2.903-6.924l2.987-1.18a2.75 2.75 0 0 0 1.536-1.524z" clip-rule="evenodd"/><path fill="url(#SVG8mx9Iccj)" fill-opacity="0.9" d="M24 11.93a4.828 4.828 0 1 0 0 9.656a4.828 4.828 0 0 0 0-9.656M30.035 24h-12.07c-2 0-3.621 1.62-3.621 3.62c0 2.695 1.108 4.854 2.926 6.313c1.79 1.436 4.188 2.137 6.73 2.137s4.94-.7 6.73-2.137c1.818-1.46 2.926-3.618 2.926-6.312c0-2-1.621-3.621-3.621-3.621"/><defs><linearGradient id="SVGurBoqbnc" x1="10.667" x2="30.667" y1="1.778" y2="46.222" gradientUnits="userSpaceOnUse"><stop stop-color="#1ec8b0"/><stop offset="1" stop-color="#2764e7"/></linearGradient><linearGradient id="SVGuGDwKeby" x1="30.191" x2="38.118" y1="8.912" y2="48.302" gradientUnits="userSpaceOnUse"><stop offset=".533" stop-color="#ff6ce8" stop-opacity="0"/><stop offset="1" stop-color="#ff6ce8"/></linearGradient><linearGradient id="SVG8mx9Iccj" x1="38.492" x2="-3.893" y1="56.761" y2="-5.423" gradientUnits="userSpaceOnUse"><stop stop-color="#9deaff"/><stop offset="1" stop-color="#fff"/></linearGradient></defs></g></svg>
+						</div>
+						
+						<div>
+							<p>${CONFIG.title} • v${CONFIG.version}</p>
+							<ul class="rvt-footer-base__list" style="margin-left: 0;">
+								<li class="rvt-footer-base__item">
+									<a class="rvt-footer-base__link" href="${CONFIG.website}" target="_blank">About</a>
+								</li>
+								<li class="rvt-footer-base__item">
+									<a class="rvt-footer-base__link" href="${CONFIG.docs}" target="_blank">How to Use</a>
+								</li>
+								<li class="rvt-footer-base__item">
+									<a class="rvt-footer-base__link" href="${CONFIG.feedback}" target="_blank">Feedback</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</footer>
             `}
 
 		`;
 	}
 
+	_renderUpdateView() {
+		return renderUpdateView(this._latestVersionInfo);
+	}
+
 	_renderHubView() {
-		return html`
-				<h1 class="rvt-sr-only">LibGuides Accessibility Tool</h1>
-
-				${this._isScanning ? 
-						// Scanning is occuring
-						html`<loading-message message="Loading Accessibility Tool..."></loading-message>` 
-						: html`
-
-					<div style="background: #f4f0f4; padding: 10px 0;">
-						<h2 class="rvt-text-bold">This Page</h2>
-						<table class="rvt-table-plain">
-							<thead>
-								<tr>
-									<th>Page</th>
-									<th>Issues</th>
-									<th>Checks</th>
-								</tr>
-							</thead>
-
-							<tbody>
-								${until(this._scanResults.map((page) => html`
-									${ !page.current ? nothing : html`
-										<tr class="rvt-link-hub__item rvt-link-hub__link">
-										<td class="">
-											<a class="rvt-link-hub__text rvt-ts-xs rvt-text-bold rvt-flex rvt-flex-row rvt-items-center" @click=${() => this._selectPage(page)}>
-												<img class="rvt-card__image" src=${page.image?.src || 'https://s3.amazonaws.com/libapps/apps/common/images/gc-md.gif'} alt="" style="aspect-ratio:1; height:30px; object-fit: cover; margin-right: 10px; border-radius: 4px;">
-												${page.title}
-											</a>
-										</td>
-										${(() => {
-										const counts = this.getCounts(page);
-										return html`
-											<td>
-											<smart-badge value="${counts.issues}"></smart-badge>
-											</td>
-											<td>
-												<smart-badge value="${counts.checks}"></smart-badge>
-											</td>
-										`;
-										})()}
-									</tr>`}
-									`), nothing)}
-							</tbody>
-						</table>
-					</div>
-
-					<h2 class="rvt-text-bold">All Pages</h2>
-					<table class="rvt-table-plain">
-					<thead>
-						<tr>
-							<th>Page</th>
-							<th>Issues</th>
-							<th>Checks</th>
-						</tr>
-					</thead>
-
-					<tbody>
-					
-
-					${until(this._scanResults.map((page) => html`
-						<tr class="rvt-link-hub__item rvt-link-hub__link">
-							<td class="">
-								<a class="rvt-link-hub__text rvt-ts-xs rvt-text-bold rvt-flex rvt-flex-row" @click=${() => this._selectPage(page)}>
-									<img class="rvt-card__image" src=${page.image?.src || 'https://s3.amazonaws.com/libapps/apps/common/images/gc-md.gif'} alt="" style="aspect-ratio:1; height:30px; object-fit: cover; margin-right: 10px; border-radius: 4px;">
-									${page.title}
-								</a>
-							</td>
-							${(() => {
-							const counts = this.getCounts(page);
-							return html`
-								<td>
-								<smart-badge value="${counts.issues}"></smart-badge>
-								</td>
-								<td>
-									<smart-badge value="${counts.checks}"></smart-badge>
-								</td>
-							`;
-							})()}
-						</tr>
-				`), html`<loading-message message="Loading Accessibility Tool..."></loading-message>`)}`}
-
-				</tbody>
-				</table>
-
-		`;
+		return renderHubView({
+			isScanning: this._isScanning,
+			scanResults: this._scanResults,
+			getCounts: (page) => this.getCounts(page),
+			selectPage: (page) => this._selectPage(page)
+		});
 	}
 
 	_renderDetailView() {
-		const page = this._selectedPage;
-
-		const severity = {}
-
-		const getViolationSeverity = (violation) => {
-			if (violation.impact === 'critical' || violation.impact === 'serious') {
-				return { type: 'critical', label: 'Critical', color: '#c41e3a', bgColor: '#ffe0e0'};
-			} else if (violation.impact === 'moderate' || violation.impact === 'minor') {
-				return { type: 'required', label: 'Required', color: '#f9a825', bgColor: '#fff8e0' };
-			} else if (violation.impact === 'check') {
-				return { type: 'check', label: 'Check', color: '#330D2B', bgColor: '#DECADC' };
-			}
-			return { type: 'unknown', label: 'Unknown', color: '#666', bgColor: '#f5f5f5' };
-		};
-
-		const groupedViolations = {
-			critical: [],
-			required: [],
-			check: [],
-			unknown: []
-		};
-
-		page.violations.forEach(violation => {
-			const severity = getViolationSeverity(violation);
-			groupedViolations[severity.type].push({ violation, severity });
+		return renderDetailView({
+			page: this._selectedPage,
+			highlightViolationElements: (violation) => this._highlightViolationElements(violation),
+			backToHub: () => this._backToHub(),
+			highlightNode: (node) => this._highlightNode(node),
+			initialViolationCounts: this._initialViolationCounts
 		});
-
-		const renderViolationGroup = (violations, severity) => {
-			if (violations.length === 0) return nothing;
-
-			return html`
-
-				<div style="margin-bottom: 24px;">
-					<h3 class="rvt-text-bold" style="margin-top: 0; margin-bottom: 8px;">
-						${choose(severity, [
-						['Critical', () => html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--critical-dark)" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7 1h2V4H7zm2 2a1 1 0 1 0-2 0 1 1 0 0 0 2 0"/></svg>`],
-						['Required', () => html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--required-dark)" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7-3a1 1 0 1 0 2 0 1 1 0 0 0-2 0m2 2H7v5h2z"/></svg>`],
-						['Check', () => html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--check-dark)" aria-hidden="true"><path d="M1 7h10.844L7.737 2.146 9.263.854 15.31 8l-6.047 7.146-1.526-1.292L11.844 9H1z"/></svg>`]
-							],
-						() => html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--unknown-dark)" aria-hidden="true"><path d="M4 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0m6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 2a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/></svg>`)}
-						${severity} Fixes (${violations.length})
-					</h3>
-					${violations.map(({ violation, severity }) => html`
-						<div style="border: 1px solid #ddd; border-radius: 4px; padding: 16px; margin-bottom: 12px;">
-							<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-							<h4 style="margin: 0; color: #333; flex: 1;"><span class="rvt-badge rvt-badge--danger-secondary">${violation.nodes.length}</span> ${RULE_DEFINITIONS[violation.id]?.title || violation.id}</h4>
-							<button @click=${() => this._highlightViolationElements(violation)} class="rvt-button rvt-button--small rvt-button--secondary">
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/><path d="m15.356 7.478.027.051.235.471-.236.47-.026.052a13 13 0 0 1-.464.794 14 14 0 0 1-1.399 1.853C12.303 12.492 10.427 14 8 14s-4.302-1.508-5.493-2.831A14 14 0 0 1 .644 8.522l-.027-.051L.382 8l.235-.47a6 6 0 0 1 .125-.232 14 14 0 0 1 1.765-2.467C3.697 3.508 5.573 2 8 2s4.302 1.508 5.493 2.831a14 14 0 0 1 1.863 2.647m-12.558.768c.276.436.68 1.013 1.195 1.585C5.053 11.008 6.427 12 8 12s2.948-.992 4.007-2.169A12 12 0 0 0 13.354 8a12 12 0 0 0-1.347-1.831C10.947 4.992 9.573 4 8 4s-2.948.992-4.007 2.169A12 12 0 0 0 2.646 8q.068.113.152.246"/></svg>
-								View on Page
-							</button>
-						</div>
-							<p style="margin: 0 0 8px 0; color: #333; font-size: 14px;">${RULE_DEFINITIONS[violation.id]?.friendlyDescription || violation.description}</p>
-
-							${violation.nodes && violation.nodes.length > 0 ? html`
-								<div class="rvt-disclosure" data-rvt-disclosure="disclosure-1">
-									<button class="rvt-disclosure__toggle" data-rvt-disclosure-toggle aria-expanded="false">Affected elements</button>
-									<div class="rvt-disclosure__content" data-rvt-disclosure-target hidden>
-										<ul class="rvt-prose rvt-flow" style="padding:0;margin:0;">
-											${violation.nodes.map(node => html`
-												<li style="padding:0;margin:0;list-style:none;">
-												<button @click=${() => this._highlightNode(node)} class="rvt-button rvt-button--plain" style="text-align: left; width: 100%; padding: 8px; border-radius: 4px; border: 1px solid transparent; cursor: pointer;" title="Click to highlight this element on the page">
-													<code class="rvt-font-mono rvt-ts-xxs" style="word-break: break-all; text-overflow: ellipsis; overflow: hidden;">
-														${node.html}
-													</code>
-												</button>
-												</li>
-												`)}
-										</ul>
-									</div>
-								</div>
-								<div class="rvt-disclosure" data-rvt-disclosure="disclosure-2">
-									<button class="rvt-disclosure__toggle" data-rvt-disclosure-toggle aria-expanded="false">How to Fix </button>
-									<div class="rvt-disclosure__content" data-rvt-disclosure-target hidden>
-										${(() => {
-										const rule = RULE_DEFINITIONS[violation.id];
-
-										return html`
-											<div class="rvt-prose" style="margin:0;">
-											${RULE_DEFINITIONS[violation.id]?.howToFix
-												? html`<p>${RULE_DEFINITIONS[violation.id]?.howToFix}</p>`
-												: html`<p>No fix guidance available for this issue.</p>`}
-											</div>
-										`;
-										})()}
-									</div>
-								</div>
-							` : nothing}
-						</div>
-					`)}
-				</div>
-			`;
-		};
-
-		return html`
-				<div style="padding: 16px;">
-					<button @click=${this._backToHub}  type="button" class="rvt-button rvt-button--plain">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M15 7H4.156l4.107-4.854L6.737.854.69 8l6.047 7.146 1.526-1.292L4.156 9H15z"/></svg>
-						<span>Back</span>
-					</button>
-
-					<h2 class="rvt-flex rvt-flex-row">
-						<img class="rvt-card__image" src=${page.image?.src || 'https://s3.amazonaws.com/libapps/apps/common/images/gc-md.gif'} alt="" style="aspect-ratio:1; height:30px; object-fit: cover; margin-right: 10px; border-radius: 4px;">
-						${page.title}
-					</h2>
-
-				${page.violations.length > 0 || this._initialViolationCounts.has(page.title) ? html`
-					
-					
-					${(() => {
-						const criticalCount = groupedViolations.critical.length;
-						const requiredCount = groupedViolations.required.length;
-						const checkCount = groupedViolations.check.length;
-						const currentTotal = criticalCount + requiredCount + checkCount;
-						
-						// Get initial counts and calculate resolved violations
-								const initialCounts = this._initialViolationCounts.get(page.title) || { critical: 0, required: 0, check: 0 };
-						const resolvedCritical = Math.max(0, initialCounts.critical - criticalCount);
-						const resolvedRequired = Math.max(0, initialCounts.required - requiredCount);
-						const resolvedCheck = Math.max(0, initialCounts.check - checkCount);
-						const resolvedTotal = resolvedCritical + resolvedRequired + resolvedCheck;
-						
-						const grandTotal = currentTotal + resolvedTotal;
-						if (grandTotal === 0) return nothing;
-						
-						const criticalPercent = (criticalCount / grandTotal) * 100;
-						const requiredPercent = (requiredCount / grandTotal) * 100;
-						const checkPercent = (checkCount / grandTotal) * 100;
-						const resolvedPercent = (resolvedTotal / grandTotal) * 100;
-						
-						return html`
-							<div style="margin-top: 24px; margin-bottom: 24px;">
-								<h3 class="rvt-text-bold" style="margin-top: 0; margin-bottom: 12px;">Violations Summary</h3>
-								<table class="charts-css bar multiple stacked">
-									<tbody>
-										<tr>
-											${criticalCount > 0 ? html`
-												<td style="--size: calc(${criticalCount} / ${grandTotal}); --color: var(--critical-light)">
-													<span style="color: var(--critical-dark)">${criticalCount}</span>
-													<span>Critical</span>
-												</td>
-											` : nothing}
-											${requiredCount > 0 ? html`
-												<td style="--size: calc(${requiredCount} / ${grandTotal}); --color: var(--required-light) ">
-													<span style="color: var(--required-dark)">${requiredCount}</span>
-													<span>Required</span>
-												</td>
-											` : nothing}
-											${checkCount > 0 ? html`
-												<td style="--size: calc(${checkCount} / ${grandTotal}); --color: var(--check-light);">
-													<span style="color: var(--check-dark)">${checkCount}</span>
-													<span>Check</span>
-												</td>
-											` : nothing}
-											${resolvedTotal > 0 ? html`
-												<td style="--size: calc(${resolvedTotal} / ${grandTotal}); --color: #27ae60;">
-													<span style="color: var(--resolved-dark)">${resolvedTotal}</span>
-													<span>Resolved</span>
-												</td>
-											` : nothing}
-										</tr>
-									</tbody>
-								</table>
-								${resolvedTotal > 0 ? html`<p style="margin: 8px 0 0 0; font-size: 12px; color: #27ae60; font-weight: 500;">Progress: ${Math.round((resolvedTotal / (currentTotal + resolvedTotal)) * 100)}% resolved</p>` : nothing}
-							</div>
-						`;
-					})()}
-				` : nothing}
-					 
-
-					<div style="margin-top: 24px;">
-						${page.violations.length === 0 ? html`
-							<div class="rvt-alert rvt-alert--success [ rvt-m-top-md ]" role="alert" aria-labelledby="success-alert-title" data-rvt-alert="success">
-								<div class="rvt-alert__title" id="success-alert-title">Passed All Checks</div>
-								<p class="rvt-alert__message">This page passed all the accessibility checks this tool runs!</p>
-							</div>
-						` : html`
-							${renderViolationGroup(groupedViolations.critical, 'Critical')}
-							${renderViolationGroup(groupedViolations.required, 'Required')}
-							${renderViolationGroup(groupedViolations.check, 'Check')}
-							${renderViolationGroup(groupedViolations.unknown, 'Unknown')}
-						`}
-					</div>
-				</div>
-		`;
 	}
 }
 

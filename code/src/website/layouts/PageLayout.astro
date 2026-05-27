@@ -1,0 +1,30 @@
+---
+import PrimaryNav from '../components/PrimaryNav.astro'
+import Footer from '../components/Footer.astro';
+import CONFIG from '../../bookmarklet/config.json' with { type: 'json' };
+interface Props {
+	title: string
+}
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<title>{Astro.props.title} | {CONFIG.title} | Indiana University {CONFIG.department}</title>
+        <meta name="title" content="LibGuides Accessibility Tool">
+        <meta name="description" content="Discover known accessibility violations on LibGuides pages and correct them">
+        <meta name="keywords" content="accessibility, libguides, IU, indiana university, libraries">
+        <meta name="robots" content="noindex, nofollow">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="language" content="English">
+		<link rel="stylesheet" href="https://unpkg.com/rivet-core@latest/css/rivet.min.css">
+	</head>
+	<body>
+		<PrimaryNav></PrimaryNav>
+        <slot></slot>
+		<Footer></Footer>
+	</body>
+</html>
