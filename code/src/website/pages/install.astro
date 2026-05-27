@@ -1,6 +1,8 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro"
 import CONFIG from '../../bookmarklet/config.json' with { type: 'json' };
+import bookmarkletContent from '../../../dist-bookmarklet/bookmarklet.txt?raw';
+const BOOKMARKLET_URL_ENCODED = encodeURI(bookmarkletContent.trim());
 ---
 
 <PageLayout title="Install">
@@ -13,7 +15,7 @@ import CONFIG from '../../bookmarklet/config.json' with { type: 'json' };
                 <p class="rvt-ts-18 rvt-text-center">Click-and-Drag the Bookmarklet below into your Bookmarks Bar</p>
                 <!-- <p>Don't see a Bookmarks Bar? Press <kbd>Command/Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd></p> -->
                 
-                <a class="install-btn rvt-button rvt-button--secondary rvt-flex rvt-flex-column rvt-items-center rvt-justify-center rvt-p-all-md rvt-m-top-xl rvt-m-bottom-none rvt-text-center" href="javascript:void%20function(){var%20a=prompt(%22What%20is%20your%20name%3F%22,%22Your%20Name%22);null!=a%26%26alert(%22Hello%20%22+a)}();">
+                <a class="install-btn rvt-button rvt-button--secondary rvt-flex rvt-flex-column rvt-items-center rvt-justify-center rvt-p-all-md rvt-m-top-xl rvt-m-bottom-none rvt-text-center" href={BOOKMARKLET_URL_ENCODED}>
                     <img src="/favicon.svg" alt="">
                     <p>{CONFIG.title}</p>
                 </a>
