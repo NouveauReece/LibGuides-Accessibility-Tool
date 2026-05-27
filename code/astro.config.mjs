@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight'; // Documentation
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://libguidesally.reecen.dev/',
   srcDir: './src/website',
   outDir: 'dist-website',
   integrations: [
