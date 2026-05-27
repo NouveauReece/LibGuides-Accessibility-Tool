@@ -27,7 +27,7 @@ jobs:
             # node-version: 24 # The specific version of Node that should be used to build your site. Defaults to 24. (optional)
             # package-manager: pnpm@latest # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
             build-cmd: npm run build:astro # The command to run to build your site. Runs the package build script/task by default. (optional)
-            # out-dir: dist # The output directory created by the build command. Defaults to dist. (optional)
+            out-dir: dist-website # The output directory created by the build command. Defaults to dist. (optional)
 
   deploy:
     needs: build
