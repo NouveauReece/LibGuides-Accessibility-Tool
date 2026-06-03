@@ -28,6 +28,9 @@ jobs:
           date -u +"%Y-%m-%dT%H:%M:%SZ" > code/public/version.txt
           jq --arg v "$VERSION" '.version = $v' code/src/bookmarklet/config.json > tmp.json && mv tmp.json code/src/bookmarklet/config.json
 
+      - name: Install dependencies and build bookmarklet
+        run: cd code && npm install && npm run build:bookmarklet
+
       - name: Install, build, and upload Astro site
         uses: withastro/action@v6
         with:
