@@ -22,6 +22,9 @@ export async function getPages() {
     })
 
     pages = await Promise.all(pages.map(async (page) => {
+        if (page) {
+            console.log(page.title,page.active);
+        }
         const source = (async () => {
             if (location.hostname != "guides.libraries.indiana.edu") {
                 return document.documentElement.outerHTML;
