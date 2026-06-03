@@ -13,7 +13,7 @@ const bookmarklet = `javascript:(function(){${minified}})()`
 writeFileSync('dist-bookmarklet/bookmarklet.txt', bookmarklet)
 
 // Copy bookmarklet.js to public directory
-copyFileSync('dist-bookmarklet/bookmarklet.js', 'public/bookmarklet.js')
+copyFileSync('dist-bookmarklet/bookmarklet-mini.js', 'public/bookmarklet.js')
 
 // Log the byte count
 const stats = statSync('dist-bookmarklet/bookmarklet.txt')
