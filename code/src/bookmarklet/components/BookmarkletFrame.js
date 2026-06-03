@@ -331,13 +331,6 @@ class BookmarkletFrame extends LitElement {
 		if (firstElement) {
 			firstElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 		}
-
-		// Track violation view in analytics
-		try {
-			trackViolationViewed(violation);
-		} catch (error) {
-			console.warn('[LAT] Failed to track violation view:', error);
-		}
 	}
 
 	_clearHighlights() {

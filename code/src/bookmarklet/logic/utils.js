@@ -11,7 +11,7 @@ export async function getPages() {
     .map((link) => ({
         title: link.innerText.trim(),
         url: link.href,
-        current: link.classList.contains('active')
+        current: link.classList.contains('active') || link.parentElement.classList.contains('active')
     }))
     .filter(page => {
         if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
