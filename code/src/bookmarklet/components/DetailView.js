@@ -1,6 +1,13 @@
 import { html, nothing } from "lit";
-import { choose } from 'lit-html/directives/choose.js';
 import { RULE_DEFINITIONS } from '../rules/ruleDescriptions.js';
+import { getViolationSeverity } from '../logic/violationSeverity.js';
+
+const SEVERITY_ICONS = {
+	critical: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-crimson-500)" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7 1h2V4H7zm2 2a1 1 0 1 0-2 0 1 1 0 0 0 2 0"/></svg>`, varPrefix: '--critical' },
+	required: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#996400" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7-3a1 1 0 1 0 2 0 1 1 0 0 0-2 0m2 2H7v5h2z"/></svg>`, varPrefix: '--required' },
+	check: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-purple-700)" aria-hidden="true"><path d="M1 7h10.844L7.737 2.146 9.263.854 15.31 8l-6.047 7.146-1.526-1.292L11.844 9H1z"/></svg>`, varPrefix: '--check' },
+	unknown: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-black-600)" aria-hidden="true"><path d="M4 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0m6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 2a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/></svg>`, varPrefix: '--unknown' }
+};
 
 export function renderDetailView({
 	page,
@@ -9,16 +16,6 @@ export function renderDetailView({
 	highlightNode,
 	initialViolationCounts
 }) {
-	const getViolationSeverity = (violation) => {
-		if (violation.impact === 'critical' || violation.impact === 'serious') {
-			return { type: 'critical', label: 'Critical', color: '#c41e3a', bgColor: '#ffe0e0'};
-		} else if (violation.impact === 'moderate' || violation.impact === 'minor') {
-			return { type: 'required', label: 'Required', color: '#f9a825', bgColor: '#fff8e0' };
-		} else if (violation.impact === 'check') {
-			return { type: 'check', label: 'Check', color: '#330D2B', bgColor: '#DECADC' };
-		}
-		return { type: 'unknown', label: 'Unknown', color: '#666', bgColor: '#f5f5f5' };
-	};
 
 	const groupedViolations = {
 		critical: [],
@@ -38,12 +35,7 @@ export function renderDetailView({
 		return html`
 			<div style="margin-bottom: 24px;">
 				<h3 class="rvt-text-bold" style="margin-top: 0; margin-bottom: 8px;">
-					${choose(severity, [
-					['Critical', () => html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--critical-dark)" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7 1h2V4H7zm2 2a1 1 0 1 0-2 0 1 1 0 0 0 2 0"/></svg>`],
-					['Required', () => html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--required-dark)" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7-3a1 1 0 1 0 2 0 1 1 0 0 0-2 0m2 2H7v5h2z"/></svg>`],
-					['Check', () => html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--check-dark)" aria-hidden="true"><path d="M1 7h10.844L7.737 2.146 9.263.854 15.31 8l-6.047 7.146-1.526-1.292L11.844 9H1z"/></svg>`]
-						],
-					() => html`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--unknown-dark)" aria-hidden="true"><path d="M4 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0m6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 2a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/></svg>`)}
+					${html`${SEVERITY_ICONS[severity]?.icon}`}
 					${severity} Fixes (${violations.length})
 				</h3>
 				${violations.map(({ violation, severity }) => html`
@@ -140,20 +132,20 @@ export function renderDetailView({
 								<tbody>
 									<tr>
 										${criticalCount > 0 ? html`
-											<td style="--size: calc(${criticalCount} / ${grandTotal}); --color: var(--critical-light)">
-												<span style="color: var(--critical-dark)">${criticalCount}</span>
+											<td style="--size: calc(${criticalCount} / ${grandTotal}); --color: var(--rvt-color-crimson-100)">
+												<span style="color: var(--rvt-color-crimson-500)">${criticalCount}</span>
 												<span>Critical</span>
 											</td>
 										` : nothing}
 										${requiredCount > 0 ? html`
-											<td style="--size: calc(${requiredCount} / ${grandTotal}); --color: var(--required-light) ">
-												<span style="color: var(--required-dark)">${requiredCount}</span>
+											<td style="--size: calc(${requiredCount} / ${grandTotal}); --color: var(--rvt-color-gold-100) ">
+												<span style="color: #996400">${requiredCount}</span>
 												<span>Required</span>
 											</td>
 										` : nothing}
 										${checkCount > 0 ? html`
-											<td style="--size: calc(${checkCount} / ${grandTotal}); --color: var(--check-light);">
-												<span style="color: var(--check-dark)">${checkCount}</span>
+											<td style="--size: calc(${checkCount} / ${grandTotal}); --color: var(--rvt-color-purple-100);">
+												<span style="color: var(--rvt-color-purple-700)">${checkCount}</span>
 												<span>Check</span>
 											</td>
 										` : nothing}

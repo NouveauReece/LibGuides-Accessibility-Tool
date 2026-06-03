@@ -74,35 +74,6 @@ export function trackEvent(eventName, eventData = {}) {
 	}
 }
 
-/**
- * Fallback: Send event directly to GA4 endpoint
- * Used if gtag script failed to load
- * @param {string} eventName
- * @param {object} eventData
- */
-function sendEventToGA4Endpoint(eventName, eventData) {
-	try {
-		const payload = {
-			measurement_id: GA_MEASUREMENT_ID,
-			api_secret: '', // Will be handled client-side via GA config
-			events: [{
-				name: eventName,
-				params: eventData
-			}]
-		};
-
-		// Send to GA4 measurement protocol
-		fetch('https://www.google-analytics.com/mp/collect', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(payload),
-			keepalive: true
-		}).catch(e => console.warn('[A11y Analytics] Direct endpoint failed:', e));
-	} catch (error) {
-		console.warn('[A11y Analytics] Error sending to GA4 endpoint:', error);
-	}
-}
-
 function flushEventQueue() {
 	while (eventQueue.length > 0) {
 		const { eventName, eventData } = eventQueue.shift();

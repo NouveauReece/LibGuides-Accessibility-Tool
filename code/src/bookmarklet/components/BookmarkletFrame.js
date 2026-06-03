@@ -5,10 +5,10 @@ import { scanPages } from '../logic/scan.js'
 import { isUpdateAvailable, getLatestVersionInfo } from '../logic/updater.js';
 import { getUserIdentifier } from '../logic/userIdentification.js';
 import { initializeAnalytics, trackBookmarkletOpened } from '../logic/analytics.js';
+import { getViolationSeverity } from '../logic/violationSeverity.js';
 import { renderHubView } from './HubView.js';
 import { renderDetailView } from './DetailView.js';
 import { renderUpdateView } from './UpdateView.js';
-import "./PrimaryNav.js";
 import "./Loading.js";
 import "./SmartBadge.js";
 
@@ -31,19 +31,24 @@ class BookmarkletFrame extends LitElement {
 
 	constructor() {
 		super();
+		// UI state
 		this._snapped = true;
+		this._minimised = false;
+		// Drag state
 		this._dragging = false;
 		this._offsetX = 0;
 		this._offsetY = 0;
-		this._onMouseMove = this._dragElement.bind(this);
-		this._onMouseUp = this._stopDragging.bind(this);
-		this._onResize = this._clampToWindow.bind(this);
-		this._minimised = false;
-        this._numberOfPages = 0;
+		// Event handlers (use arrow functions for lexical this binding)
+		this._onMouseMove = (e) => this._dragElement(e);
+		this._onMouseUp = (e) => this._stopDragging(e);
+		this._onResize = () => this._clampToWindow();
+		// Scan state
+		this._numberOfPages = 0;
 		this._scanResults = null;
 		this._isScanning = false;
 		this._selectedPage = null;
-		this._initialViolationCounts = new Map(); // Track initial violation counts for resolved tracking
+		this._initialViolationCounts = new Map();
+		// Update state
 		this._latestVersionInfo = null;
 		this._updateAvailable = null;
 		this._userIdentifier = null;
@@ -61,9 +66,7 @@ class BookmarkletFrame extends LitElement {
 
 		:host {
 			background-color: white;
-			width: 450px;
 			max-height: 100svh;
-			position: fixed;
 			width: 400px;
 			position: fixed;
 			top: 0;
@@ -72,15 +75,6 @@ class BookmarkletFrame extends LitElement {
 			box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
 			animation: slideIn 0.3s ease-out;
 			transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-			--critical-light: var(--rvt-color-crimson-100);
-			--critical-dark: var(--rvt-color-crimson-500);
-			--required-light: var(--rvt-color-gold-100);
-			--required-dark: #996400;
-			--check-light: var(--rvt-color-purple-100);
-			--check-dark: var(--rvt-color-purple-700);
-			--unknown-light: var(--rvt-color-black-100);
-			--unknown-dark: var(--rvt-color-black-600);
 		}
 
 		@media (max-width: 768px) {
@@ -219,10 +213,12 @@ class BookmarkletFrame extends LitElement {
 			this._scanResults = await this._loadAxe();
 			// Store initial violation counts for each page
 			this._scanResults.forEach(page => {
-				const critical = page.violations.filter(v => v.impact === 'critical' || v.impact === 'serious').length;
-				const required = page.violations.filter(v => v.impact === 'moderate' || v.impact === 'minor').length;
-				const check = page.violations.filter(v => v.impact === 'check').length;
-			this._initialViolationCounts.set(page.title, { critical, required, check });
+				const counts = page.violations.reduce((acc, v) => {
+					const severity = getViolationSeverity(v);
+					acc[severity.type] = (acc[severity.type] || 0) + 1;
+					return acc;
+				}, { critical: 0, required: 0, check: 0, unknown: 0 });
+				this._initialViolationCounts.set(page.title, counts);
 			});
 			this._axeLoaded = true;
 		} finally {
@@ -249,8 +245,7 @@ class BookmarkletFrame extends LitElement {
 	}
 
 	_close() {
-		this.style.animation = "slideOut 0.3s ease-in";
-		this.addEventListener("animationend", () => this.remove());
+		this.remove();
 	}
 
 	_startDragging(e) {
@@ -484,7 +479,7 @@ class BookmarkletFrame extends LitElement {
 				<div class="rvt-flex rvt-items-start">
 					<div class="rvt-p-lr-md rvt-footer-base__inner" style="gap: 10px;">
 						<div class="rvt-footer-base__logo">
-							<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 48 48"><g fill="none"><path fill="url(#SVGurBoqbnc)" fill-rule="evenodd" d="M13.1 7.278a5.247 5.247 0 0 1 6.95-2.844l2.946 1.277c.69.299 1.472.302 2.164.01l2.958-1.253a5.247 5.247 0 0 1 6.924 2.903l1.18 2.987a2.75 2.75 0 0 0 1.524 1.536l2.976 1.207a5.247 5.247 0 0 1 2.844 6.948l-1.277 2.947a2.75 2.75 0 0 0-.01 2.164l1.253 2.958a5.247 5.247 0 0 1-2.903 6.924l-2.987 1.18a2.75 2.75 0 0 0-1.536 1.524l-1.207 2.976a5.247 5.247 0 0 1-6.948 2.844l-2.947-1.277a2.75 2.75 0 0 0-2.164-.01l-2.958 1.252a5.247 5.247 0 0 1-6.924-2.902l-1.18-2.987a2.75 2.75 0 0 0-1.524-1.536l-2.976-1.207a5.247 5.247 0 0 1-2.844-6.948l1.277-2.947c.299-.69.302-1.472.01-2.164l-1.253-2.958a5.247 5.247 0 0 1 2.903-6.924l2.987-1.18a2.75 2.75 0 0 0 1.536-1.524z" clip-rule="evenodd"/><path fill="url(#SVGuGDwKeby)" fill-opacity="0.7" fill-rule="evenodd" d="M13.1 7.278a5.247 5.247 0 0 1 6.95-2.844l2.946 1.277c.69.299 1.472.302 2.164.01l2.958-1.253a5.247 5.247 0 0 1 6.924 2.903l1.18 2.987a2.75 2.75 0 0 0 1.524 1.536l2.976 1.207a5.247 5.247 0 0 1 2.844 6.948l-1.277 2.947a2.75 2.75 0 0 0-.01 2.164l1.253 2.958a5.247 5.247 0 0 1-2.903 6.924l-2.987 1.18a2.75 2.75 0 0 0-1.536 1.524l-1.207 2.976a5.247 5.247 0 0 1-6.948 2.844l-2.947-1.277a2.75 2.75 0 0 0-2.164-.01l-2.958 1.252a5.247 5.247 0 0 1-6.924-2.902l-1.18-2.987a2.75 2.75 0 0 0-1.524-1.536l-2.976-1.207a5.247 5.247 0 0 1-2.844-6.948l1.277-2.947c.299-.69.302-1.472.01-2.164l-1.253-2.958a5.247 5.247 0 0 1 2.903-6.924l2.987-1.18a2.75 2.75 0 0 0 1.536-1.524z" clip-rule="evenodd"/><path fill="url(#SVG8mx9Iccj)" fill-opacity="0.9" d="M24 11.93a4.828 4.828 0 1 0 0 9.656a4.828 4.828 0 0 0 0-9.656M30.035 24h-12.07c-2 0-3.621 1.62-3.621 3.62c0 2.695 1.108 4.854 2.926 6.313c1.79 1.436 4.188 2.137 6.73 2.137s4.94-.7 6.73-2.137c1.818-1.46 2.926-3.618 2.926-6.312c0-2-1.621-3.621-3.621-3.621"/><defs><linearGradient id="SVGurBoqbnc" x1="10.667" x2="30.667" y1="1.778" y2="46.222" gradientUnits="userSpaceOnUse"><stop stop-color="#1ec8b0"/><stop offset="1" stop-color="#2764e7"/></linearGradient><linearGradient id="SVGuGDwKeby" x1="30.191" x2="38.118" y1="8.912" y2="48.302" gradientUnits="userSpaceOnUse"><stop offset=".533" stop-color="#ff6ce8" stop-opacity="0"/><stop offset="1" stop-color="#ff6ce8"/></linearGradient><linearGradient id="SVG8mx9Iccj" x1="38.492" x2="-3.893" y1="56.761" y2="-5.423" gradientUnits="userSpaceOnUse"><stop stop-color="#9deaff"/><stop offset="1" stop-color="#fff"/></linearGradient></defs></g></svg>
+							<img src="https://raw.githubusercontent.com/NouveauReece/LibGuides-Accessibility-Tool/refs/heads/main/code/public/favicon.svg">
 						</div>
 						
 						<div>

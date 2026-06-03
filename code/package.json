@@ -10,6 +10,8 @@
     "build:astro": "astro build",
     "dev:bookmarklet": "vite dev --config vite.bookmarklet.config.mjs",
     "build:bookmarklet": "vite build --config vite.bookmarklet.config.mjs && node scripts/wrap-bookmarklet.mjs",
+    "build:bookmarklet:external-lit": "EXTERNAL_LIT=true vite build --config vite.bookmarklet.config.mjs && node scripts/wrap-bookmarklet.mjs",
+    "build:bookmarklet:bundled-lit": "EXTERNAL_LIT=false vite build --config vite.bookmarklet.config.mjs && node scripts/wrap-bookmarklet.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "test": "echo hi"

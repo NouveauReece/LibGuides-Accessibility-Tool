@@ -1,10 +1,21 @@
-import { readFileSync, writeFileSync } from 'fs'
+import { readFileSync, writeFileSync, copyFileSync, statSync } from 'fs'
 
-// This is the JS bundle
+// Read the bundle (minified by Vite/Rollup)
 const code = readFileSync('dist-bookmarklet/bookmarklet.js', 'utf-8')
-const bookmarklet = `javascript:(function(){${code.trim()}})();`
 
-// And this is .txt has a URL for pasting into an address bar
+// Collapse all whitespace (including newlines and spaces) to minimize further
+let minified = code.replace(/\s+/g, '')
+
+// Wrap the minified code inline without newlines or indentation
+const bookmarklet = `javascript:(function(){${minified}})()`
+
+// Write to bookmarklet.txt
 writeFileSync('dist-bookmarklet/bookmarklet.txt', bookmarklet)
 
-console.log('Bookmarklet written to dist-bookmarklet/bookmarklet.txt')
+// Copy bookmarklet.js to public directory
+copyFileSync('dist-bookmarklet/bookmarklet.js', 'public/bookmarklet.js')
+
+// Log the byte count
+const stats = statSync('dist-bookmarklet/bookmarklet.txt')
+console.log(`Bookmarklet written to dist-bookmarklet/bookmarklet.txt (${stats.size} bytes)`)
+console.log(`Bookmarklet copied to public/bookmarklet.js`)
