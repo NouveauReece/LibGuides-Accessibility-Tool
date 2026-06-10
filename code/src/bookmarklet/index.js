@@ -13,19 +13,42 @@ import './components/BookmarkletFrame.js'
     });
     document.body.appendChild(tool);
 
-    if (document.querySelector('[role="dialog"].ui-dialog')) {
+    // Setup for dialogs
+    const setupDialogs = () => {
       document.querySelectorAll('[role="dialog"].ui-dialog').forEach((el) => {
-        el.addEventListener('click', () => {
-          document.querySelector('accessibility-tool').style.zIndex = 999;
-        })
+        if (!el.dataset.a11yDialogSetup) {
+          el.addEventListener('click', () => {
+            document.querySelector('accessibility-tool').style.zIndex = 999;
+          });
+          el.dataset.a11yDialogSetup = 'true';
+        }
       });
-    }
+    };
 
-    if (document.querySelector('.ui-widget-overlay')) {
+    // Setup for overlays
+    const setupOverlays = () => {
       document.querySelectorAll('.ui-widget-overlay').forEach((el) => {
-        el.style = 'z-index: 10!important';
-      })
-    }
+        if (!el.dataset.a11yOverlaySetup) {
+          el.style.zIndex = '10!important';
+          el.dataset.a11yOverlaySetup = 'true';
+        }
+      });
+    };
+
+    // Run setup immediately if elements exist
+    setupDialogs();
+    setupOverlays();
+
+    // Watch for future DOM changes
+    const observer = new MutationObserver(() => {
+      setupDialogs();
+      setupOverlays();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
 
   }
 })();
