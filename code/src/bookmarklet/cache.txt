@@ -1,0 +1,8 @@
+// if (!cached || cached.version !== version) {
+// 	console.log("[LAT] New version available: " + version + " — Downloading...");
+// 	return installAndRun(version);
+// }
+// if (cached) {
+// 	console.log("[LAT] Running from cache (version: " + cached.version + ")...");
+// 	return run(cached.code);
+// }
