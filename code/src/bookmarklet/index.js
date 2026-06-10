@@ -16,22 +16,16 @@ import './components/BookmarkletFrame.js'
     // Setup for dialogs
     const setupDialogs = () => {
       document.querySelectorAll('[role="dialog"].ui-dialog').forEach((el) => {
-        if (!el.dataset.a11yDialogSetup) {
-          el.addEventListener('click', () => {
+        el.addEventListener('click', () => {
             document.querySelector('accessibility-tool').style.zIndex = 999;
           });
-          el.dataset.a11yDialogSetup = 'true';
-        }
       });
     };
 
     // Setup for overlays
     const setupOverlays = () => {
       document.querySelectorAll('.ui-widget-overlay').forEach((el) => {
-        if (!el.dataset.a11yOverlaySetup) {
-          el.style.zIndex = '10!important';
-          el.dataset.a11yOverlaySetup = 'true';
-        }
+        el.style = 'z-index: 10!important';
       });
     };
 
