@@ -68,7 +68,6 @@ class BookmarkletFrame extends LitElement {
 			position: fixed;
 			top: 0;
 			right: 0;
-			z-index: 2000000000;
 			box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
 			animation: slideIn 0.3s ease-out;
 			transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
