@@ -1,3 +1,5 @@
+import CONFIG from '../config.json' assert { type: 'json' };
+
 /**
  * Returns an array of page objects with properties:
  *      title - page title
@@ -6,6 +8,7 @@
  *      image - url of the first image featured on the page
  *      url - page url
  */
+
 export async function getPages() {
     let pages = [...document.querySelectorAll('[aria-label="Guide Pages"] li a:not([id^="s-lg-admin"]):not([href*="#"]):not([href*="javascript:"])')]
     .map((link) => ({
@@ -22,8 +25,11 @@ export async function getPages() {
     })
 
     pages = await Promise.all(pages.map(async (page) => {
+        const userGuideUrl = new URL(CONFIG['libguides-url-user']).hostname;
+		const adminGuideUrl = new URL(CONFIG['libguides-url-admin']).hostname;
+
         const source = (async () => {
-            if (location.hostname != "guides.libraries.indiana.edu") {
+            if (location.hostname != userGuideUrl && location.hostname != adminGuideUrl) {
                 return document.documentElement.outerHTML;
             } else {
                 const response = await fetch(page.url);

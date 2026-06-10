@@ -21,5 +21,11 @@ import './components/BookmarkletFrame.js'
       });
     }
 
+    if (document.querySelector('.ui-widget-overlay')) {
+      document.querySelectorAll('.ui-widget-overlay').forEach((el) => {
+        el.style = 'z-index: 10!important';
+      })
+    }
+
   }
 })();
