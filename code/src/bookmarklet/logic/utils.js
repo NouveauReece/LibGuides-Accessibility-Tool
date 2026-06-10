@@ -48,7 +48,7 @@ export async function getPages() {
         const allImages = container.querySelectorAll('img');
         let image = null;
         for (const img of allImages) {
-            const src = img.src || '';
+            const src = img.src || 'https://s3.amazonaws.com/libapps/apps/common/images/gc-md.gif';
             if (!src.includes('/libapps/apps/common') && !src.includes('/icons')) {
                 image = {
                     src: src,
@@ -58,7 +58,7 @@ export async function getPages() {
                 break;
             }
         }
-
+        
         return { ...page, container, image }
     }))
     console.log(pages);
