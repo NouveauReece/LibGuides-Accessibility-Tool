@@ -1,6 +1,8 @@
 import { html, nothing } from "lit";
 import { RULE_DEFINITIONS } from '../rules/ruleDescriptions.js';
 import { getViolationSeverity } from '../logic/violationSeverity.js';
+import tagPrettyName from "../rules/prettyTagNames.js";
+import { getAccessibleName } from "../logic/getAccessibleName.js"
 
 const SEVERITY_ICONS = {
 	critical: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-crimson-500)" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7 1h2V4H7zm2 2a1 1 0 1 0-2 0 1 1 0 0 0 2 0"/></svg>`, varPrefix: '--critical' },
@@ -32,6 +34,8 @@ export function renderDetailView({
 	const renderViolationGroup = (violations, severity) => {
 		if (violations.length === 0) return nothing;
 
+		console.log(violations);
+
 		return html`
 			<div style="margin-bottom: 24px;">
 				<h3 class="rvt-text-bold" style="margin-top: 0; margin-bottom: 8px;">
@@ -52,11 +56,13 @@ export function renderDetailView({
 						${violation.nodes && violation.nodes.length > 0 ? html`
 							<div class="rvt-disclosure" data-rvt-disclosure="disclosure-1">
 								<button class="rvt-disclosure__toggle" data-rvt-disclosure-toggle aria-expanded="false">Affected elements</button>
-								<div class="rvt-disclosure__content" data-rvt-disclosure-target hidden>
+								<div class="rvt-disclosure__content" style="margin-left: 1rem" data-rvt-disclosure-target hidden>
 									<ul class="rvt-prose rvt-flow" style="padding:0;margin:0;">
 										${violation.nodes.map(node => html`
-											<li style="padding:0;margin:0;list-style:none;">
-											<button @click=${() => highlightNode(node)} class="rvt-button rvt-button--plain" style="text-align: left; width: 100%; padding: 8px; border-radius: 4px; border: 1px solid transparent; cursor: pointer;" title="Click to highlight this element on the page">
+											<li style="padding:0 0 5px 0; margin:0; list-style:none;">
+											<button @click=${() => highlightNode(node)} class="rvt-button rvt-button--secondary grid-btn" style="cursor: pointer; text-align: start" title="Click to highlight this element on the page">
+												<svg style="grid-area: icon;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/><path d="m15.356 7.478.027.051.235.471-.236.47-.026.052a13 13 0 0 1-.464.794 14 14 0 0 1-1.399 1.853C12.303 12.492 10.427 14 8 14s-4.302-1.508-5.493-2.831A14 14 0 0 1 .644 8.522l-.027-.051L.382 8l.235-.47a6 6 0 0 1 .125-.232 14 14 0 0 1 1.765-2.467C3.697 3.508 5.573 2 8 2s4.302 1.508 5.493 2.831a14 14 0 0 1 1.863 2.647m-12.558.768c.276.436.68 1.013 1.195 1.585C5.053 11.008 6.427 12 8 12s2.948-.992 4.007-2.169A12 12 0 0 0 13.354 8a12 12 0 0 0-1.347-1.831C10.947 4.992 9.573 4 8 4s-2.948.992-4.007 2.169A12 12 0 0 0 2.646 8q.068.113.152.246"/></svg>
+												<p style="word-break: break-all; text-overflow: ellipsis; overflow: hidden;"><strong>${tagPrettyName[document.querySelector(node.target).localName.toLowerCase()]}</strong>: ${getAccessibleName(node.target) || html`<em>[No Accessible Description]</em>`}</p>
 												<code class="rvt-font-mono rvt-ts-xxs" style="word-break: break-all; text-overflow: ellipsis; overflow: hidden;">
 													${node.html}
 												</code>

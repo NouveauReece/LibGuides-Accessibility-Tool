@@ -1,25 +1,30 @@
 import { html } from 'lit';
+import CONFIG from '../config.json' assert { type: 'json' };
 
-export function renderUpdateView(info) {
+export function renderUpdateView() {
 	return html`	
 		<div class="rvt-flex rvt-flex-column rvt-p-all-xxl rvt-items-stretch" style="gap:100px">
 
 			<div class="rvt-flex rvt-flex-column rvt-items-center rvt-text-center" style="gap:25px;">
-				<svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 35 35" fill="none">
-					<path d="M0 5H35V0H0V5ZM15 17.935V35H20V17.935L26.52 23.525L29.775 19.73L17.5 9.205L5.225 19.73L8.48 23.525L15 17.935Z" fill="#006298"/>
-				</svg>
+				<!-- <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 35 35" fill="none">
+					<path d="M8 14H4V10H8V14ZM26 0H10C8.9 0 8 .9 8 2V20C8 21.1 8.9 22 10 22H26C27.1 22 28 21.1 28 20V2C28 .9 27.1 0 26 0ZM26 20H10V2H26V20ZM32 4H30V16H32V4ZM32 20H30V22H32V20Z" fill="#C41E3A"/>
+				</svg> -->
 
-				<h1 class="rvt-text-bold">Update Available</h1>
-				<p>To continue scanning, let's install the latest and greatest.</p>
+				<h1 class="rvt-text-bold">Open a LibGuides Page</h1>
+				<p>Please navigate to a LibGuides page to use the ${CONFIG.title}.</p>
 
-				<a class="rvt-button" href="${info['update-url']}" target="_blank">Install Update</a>
+				<a class="rvt-button" href="${CONFIG['libguides-url-user']}" target="_blank">Go to LibGuides</a>
 				
 			</div>
 
 			<div class="rvt-flex rvt-flex-column rvt-items-stretch rvt-color-black-400">
-				<h1 class="rvt-text-bold">What's New?</h1>
-				<p>${info['whats-new'] || "It's a suprise!! 😈"}</p>
-				<p><br>Sincerely,<br>Library DUX Team
+				<h1 class="rvt-text-bold">How It Works</h1>
+				<p>This tool is designed to audit the accessibility of LibGuides pages. It works best when you open it on a page within:</p>
+				<ul style="margin-left: 20px;">
+					<li><strong>User Guides:</strong> <a href="${CONFIG['libguides-url-user']}">${CONFIG['libguides-url-user']}</a></li>
+					<li><strong>Admin Dashboard:</strong> <a href="${CONFIG['libguides-url-admin']}">${CONFIG['libguides-url-admin']}</a></li>
+				</ul>
+				<p><br>Need help? Visit our <a href="${CONFIG['docs']}" target="_blank">documentation</a> or <a href="${CONFIG['feedback']}" target="_blank">send feedback</a>.
 					<img src="https://raw.githubusercontent.com/NouveauReece/LibGuides-Accessibility-Tool/refs/heads/main/code/public/duck.svg" width="12" alt="">
 				</p>
 			</div>

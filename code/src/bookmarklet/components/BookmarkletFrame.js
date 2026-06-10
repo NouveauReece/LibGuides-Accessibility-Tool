@@ -2,7 +2,6 @@ import { LitElement, html, css, nothing } from "lit";
 import CONFIG from '../config.json' assert { type: 'json' };
 import { getPages } from '../logic/utils.js';
 import { scanPages } from '../logic/scan.js'
-import { isUpdateAvailable, getLatestVersionInfo } from '../logic/updater.js';
 import { getUserIdentifier } from '../logic/userIdentification.js';
 import { initializeAnalytics, trackBookmarkletOpened } from '../logic/analytics.js';
 import { getViolationSeverity } from '../logic/violationSeverity.js';
@@ -24,8 +23,7 @@ class BookmarkletFrame extends LitElement {
         _loadedPages: { type: Boolean, state: true },
 		_minimised: { type: Boolean, state: true },
 		_selectedPage: { type: Object, state: true },
-		_updateAvailable: { type: Boolean, state: true },
-		_latestVersionInfo: { type: Object, state: true },
+		_notOnLibGuidesPage: { type: Boolean, state: true },
 		_userIdentifier: { type: Object, state: true },
 	};
 
@@ -48,9 +46,8 @@ class BookmarkletFrame extends LitElement {
 		this._isScanning = false;
 		this._selectedPage = null;
 		this._initialViolationCounts = new Map();
-		// Update state
-		this._latestVersionInfo = null;
-		this._updateAvailable = null;
+		// Page validation state
+		this._notOnLibGuidesPage = false;
 		this._userIdentifier = null;
 	}
 
@@ -144,6 +141,15 @@ class BookmarkletFrame extends LitElement {
 			}
 
 		}
+		
+		.grid-btn {
+			display: grid;
+			grid-template-columns: 1fr auto;
+			grid-template-rows: repeat(2, 1fr);
+			grid-template-areas: "icon pretty" "icon node";
+			height: min-content;
+			padding: 5px;
+		}
 
 		.charts-css td {
 			display: flex;
@@ -193,9 +199,8 @@ class BookmarkletFrame extends LitElement {
 		try {
 			console.clear();
 			this._userIdentifier = await getUserIdentifier();
-			this._latestVersionInfo = await getLatestVersionInfo();
-			this._updateAvailable = isUpdateAvailable(this._latestVersionInfo);
-			const gaId = this._latestVersionInfo?.gaId || 'G-XXXXXXXXXX';
+			this._notOnLibGuidesPage = !this._isOnLibGuidesPage();
+			const gaId = 'G-XXXXXXXXXX';
 			initializeAnalytics(gaId, this._userIdentifier);
 			trackBookmarkletOpened();
 			const welcomeLogStyle = 'border-left: 5px solid #900; color: white; padding: 5px 10px;';
@@ -206,7 +211,7 @@ class BookmarkletFrame extends LitElement {
 	}
 
 	async _performScan() {
-		if (this._isScanning || this._scanResults || this._updateAvailable) return;
+		if (this._isScanning || this._scanResults || this._notOnLibGuidesPage) return;
 		this._isScanning = true;
 		this._axeLoaded = false;
 		try {
@@ -284,6 +289,14 @@ class BookmarkletFrame extends LitElement {
 		this.style.top = `${Math.max(0, Math.min(currentY, window.innerHeight - rect.height))}px`;
 	}
 
+	_isOnLibGuidesPage() {
+		const currentUrl = window.location.href;
+		const userGuideUrl = new URL(CONFIG['libguides-url-user']).hostname;
+		const adminGuideUrl = new URL(CONFIG['libguides-url-admin']).hostname;
+		const currentHostname = new URL(currentUrl, window.location.origin).hostname;
+		return currentHostname === userGuideUrl || currentHostname === adminGuideUrl || currentHostname === "localhost";
+	}
+
 	async _loadAxe() {
 		return await import('https://esm.sh/axe-core')
 		.then(async (axe) => { 
@@ -341,6 +354,8 @@ class BookmarkletFrame extends LitElement {
 
 	_highlightNode(node) {
 		this._clearHighlights();
+
+		console.log(node);
 
 		if (!node.target || node.target.length === 0) return;
 
@@ -460,7 +475,7 @@ class BookmarkletFrame extends LitElement {
 
 			<main aria-live="polite" aria-atomic="true">
 
-				${!this._updateAvailable ? this._renderUpdateView() : 
+				${this._notOnLibGuidesPage ? this._renderUpdateView() : 
 					this._minimised ? nothing : 
 					this._selectedPage ? this._renderDetailView() : 
 					this._renderHubView()
@@ -468,7 +483,7 @@ class BookmarkletFrame extends LitElement {
 
 			</main>
 
-			<footer class="rvt-footer-base rvt-footer-base--light rvt-flex rvt-items-start"	>
+			<footer class="rvt-footer-base rvt-footer-base--light rvt-flex rvt-items-start rvt-justify-center"	>
 				<div class="rvt-flex rvt-items-start">
 					<div class="rvt-p-lr-md rvt-footer-base__inner" style="gap: 10px;">
 						<div class="rvt-footer-base__logo">
@@ -498,7 +513,7 @@ class BookmarkletFrame extends LitElement {
 	}
 
 	_renderUpdateView() {
-		return renderUpdateView(this._latestVersionInfo);
+		return renderUpdateView();
 	}
 
 	_renderHubView() {

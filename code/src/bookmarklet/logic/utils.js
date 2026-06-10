@@ -7,7 +7,7 @@
  *      url - page url
  */
 export async function getPages() {
-    let pages = [...document.querySelectorAll('[aria-label="Guide Pages"] li a:not([id^="s-lg-admin"])')]
+    let pages = [...document.querySelectorAll('[aria-label="Guide Pages"] li a:not([id^="s-lg-admin"]):not([href*="#"]):not([href*="javascript:"])')]
     .map((link) => ({
         title: link.innerText.trim(),
         url: link.href,
@@ -22,9 +22,6 @@ export async function getPages() {
     })
 
     pages = await Promise.all(pages.map(async (page) => {
-        if (page) {
-            console.log(page.title,page.active);
-        }
         const source = (async () => {
             if (location.hostname != "guides.libraries.indiana.edu") {
                 return document.documentElement.outerHTML;
@@ -64,6 +61,7 @@ export async function getPages() {
 
         return { ...page, container, image }
     }))
+    console.log(pages);
     return pages;
 }
 

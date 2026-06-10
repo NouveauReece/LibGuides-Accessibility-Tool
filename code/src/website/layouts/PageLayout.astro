@@ -13,8 +13,8 @@ interface Props {
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
-		<title>{Astro.props.title} | {CONFIG.title} | Indiana University {CONFIG.department}</title>
-        <meta name="title" content="LibGuides Accessibility Tool">
+		<title>{Astro.props.title} | {CONFIG.title} | {CONFIG.institution} {CONFIG.department}</title>
+        <meta name="title" content={CONFIG.title}>
         <meta name="description" content="Discover known accessibility violations on LibGuides pages and correct them">
         <meta name="keywords" content="accessibility, libguides, IU, indiana university, libraries">
         <meta name="robots" content="noindex, nofollow">

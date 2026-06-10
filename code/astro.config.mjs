@@ -1,15 +1,16 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import CONFIG from './src/bookmarklet/config.json' with { type: 'json' };
 import starlight from '@astrojs/starlight'; // Documentation
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://libguidesally.reecen.dev/',
+  site: CONFIG.website,
   srcDir: './src/website',
   outDir: 'dist-website',
   integrations: [
     starlight({
-      title: 'LibGuides Accessibility Tool Docs',
+      title: `${CONFIG.title} Docs`,
       logo: {
         src: '/public/favicon.svg',
       },
@@ -21,7 +22,7 @@ export default defineConfig({
       ],
       routeMiddleware: './src/docsRouteMiddleware.mjs',
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/NouveauReece/LibGuides-Accessibility-Tool' },
+        { icon: 'github', label: 'GitHub', href: CONFIG.github },
       ],
     }),
   ]

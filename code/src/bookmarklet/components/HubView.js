@@ -1,4 +1,5 @@
 import { html, nothing } from "lit";
+import CONFIG from '../config.json' with { type: 'json' };
 import { until } from 'lit-html/directives/until.js';
 
 export function renderHubView({
@@ -8,7 +9,7 @@ export function renderHubView({
 	selectPage
 }) {
 	return html`
-		<h1 class="rvt-sr-only">LibGuides Accessibility Tool</h1>
+		<h1 class="rvt-sr-only">${CONFIG.title}</h1>
 
 		${isScanning ? 
 				// Scanning is occuring
@@ -31,7 +32,7 @@ export function renderHubView({
 							${ !page.current ? nothing : html`
 								<tr class="rvt-link-hub__item rvt-link-hub__link">
 								<td class="">
-									<a class="rvt-link-hub__text rvt-ts-xs rvt-text-bold rvt-flex rvt-flex-row rvt-items-center" @click=${() => selectPage(page)}>
+									<a class="rvt-link-hub__text rvt-ts-xs rvt-text-bold rvt-flex rvt-flex-row rvt-items-center" style="cursor:pointer;" @click=${() => selectPage(page)}>
 										<img class="rvt-card__image" src=${page.image?.src || 'https://s3.amazonaws.com/libapps/apps/common/images/gc-md.gif'} alt="" style="aspect-ratio:1; height:30px; object-fit: cover; margin-right: 10px; border-radius: 4px;">
 										${page.title}
 									</a>
@@ -67,11 +68,12 @@ export function renderHubView({
 			
 
 			${until(scanResults.map((page) => html`
-				<tr class="rvt-link-hub__item rvt-link-hub__link">
-					<td class="">
-						<a class="rvt-link-hub__text rvt-ts-xs rvt-text-bold rvt-flex rvt-flex-row" @click=${() => selectPage(page)}>
+				<tr class="rvt-link-hub__item">
+					<td style="padding-right: 0px;">
+						<a class="rvt-link-hub__text rvt-ts-xs rvt-text-bold rvt-flex rvt-flex-row rvt-items-center" href="${page.url}" title="Visit ${page.title}">
 							<img class="rvt-card__image" src=${page.image?.src || 'https://s3.amazonaws.com/libapps/apps/common/images/gc-md.gif'} alt="" style="aspect-ratio:1; height:30px; object-fit: cover; margin-right: 10px; border-radius: 4px;">
-							${page.title}
+							<span style="margin-right: 5px; word-break: break-all; text-overflow: ellipsis; overflow: hidden;">${page.title}</span>
+							<svg style="overflow: visible" aria-hidden="true" fill="currentColor" focusable="false" height="12" viewBox="0 0 16 16" width="12" xmlns="http://www.w3.org/2000/svg"><path d="M15 1H9v2h2.586l-3 3L10 7.414l3-3V7h2V1Z"></path><path d="M7 3H1v12h12V9h-2v4H3V5h4V3Z"></path></svg>
 						</a>
 					</td>
 					${(() => {
