@@ -19,6 +19,10 @@ import './components/BookmarkletFrame.js'
         el.addEventListener('click', () => {
             document.querySelector('accessibility-tool').style.zIndex = 999;
           });
+        
+        el.addEventListener('drag', () => {
+          document.querySelector('accessibility-tool').style.zIndex = 999;
+        });
       });
     };
 
