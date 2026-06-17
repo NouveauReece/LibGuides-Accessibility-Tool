@@ -8,8 +8,32 @@ const SEVERITY_ICONS = {
 	critical: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-crimson-500)" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7 1h2V4H7zm2 2a1 1 0 1 0-2 0 1 1 0 0 0 2 0"/></svg>`, varPrefix: '--critical' },
 	required: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#996400" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7-3a1 1 0 1 0 2 0 1 1 0 0 0-2 0m2 2H7v5h2z"/></svg>`, varPrefix: '--required' },
 	check: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-purple-700)" aria-hidden="true"><path d="M1 7h10.844L7.737 2.146 9.263.854 15.31 8l-6.047 7.146-1.526-1.292L11.844 9H1z"/></svg>`, varPrefix: '--check' },
-	unknown: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-black-600)" aria-hidden="true"><path d="M4 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0m6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 2a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/></svg>`, varPrefix: '--unknown' }
+	unknown: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-black-600)" aria-hidden="true"><path d="M4 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0m6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 2a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/></svg>`, varPrefix: '--unknown' },
+	hidden: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-black-600)" aria-hidden="true"><path d="M4 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0m6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 2a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/></svg>`, varPrefix: '--unknown' }
 };
+
+// Helper function to check if a violation is in a hidden box
+function isViolationInHiddenBox(violation) {
+	if (!violation.nodes || violation.nodes.length === 0) return false;
+	
+	// Check if any of the violation nodes are within a hidden box
+	for (const node of violation.nodes) {
+		try {
+			const element = document.querySelector(node.target);
+			console.log(element);
+			if (!element) continue;
+			
+			// Traverse up the DOM to find a parent .s-lib-box with a hidden indicator
+			let box = element.closest(".s-lib-box")
+			let boxTitle = box.querySelector('.s-lib-box-title');
+			return boxTitle && boxTitle.querySelector('.fa-eye-slash');
+		} catch (e) {
+			console.error(e);
+		}
+	}
+	
+	return false;
+}
 
 export function renderDetailView({
 	page,
@@ -23,12 +47,19 @@ export function renderDetailView({
 		critical: [],
 		required: [],
 		check: [],
+		hidden: [],
 		unknown: []
 	};
 
 	page.violations.forEach(violation => {
-		const severity = getViolationSeverity(violation);
-		groupedViolations[severity.type].push({ violation, severity });
+		// Check if violation is in a hidden box first
+		if (isViolationInHiddenBox(violation)) {
+			const severity = 'hidden';
+			groupedViolations['hidden'].push({ violation, severity });
+		} else {
+			const severity = getViolationSeverity(violation);
+			groupedViolations[severity.type].push({ violation, severity });
+		}
 	});
 
 	const renderViolationGroup = (violations, severity) => {
@@ -40,7 +71,7 @@ export function renderDetailView({
 			<div style="margin-bottom: 24px;">
 				<h3 class="rvt-text-bold" style="margin-top: 0; margin-bottom: 8px;">
 					${html`${SEVERITY_ICONS[severity]?.icon}`}
-					${severity} Fixes (${violations.length})
+					${severity} (${violations.length})
 				</h3>
 				${violations.map(({ violation, severity }) => html`
 					<div style="border: 1px solid #ddd; border-radius: 4px; padding: 16px; margin-bottom: 12px;">
@@ -102,9 +133,21 @@ export function renderDetailView({
 				<span>Back</span>
 			</button>
 
-			<h2 class="rvt-flex rvt-flex-row">
-				<img class="rvt-card__image" src=${page.image?.src || 'https://s3.amazonaws.com/libapps/apps/common/images/gc-md.gif'} alt="" style="aspect-ratio:1; height:30px; object-fit: cover; margin-right: 10px; border-radius: 4px;">
-				${page.title}
+			<h2 class="rvt-flex rvt-flex-row rvt-items-center">
+				<img class="rvt-card__image" src=${page.image?.src || 'https://s3.amazonaws.com/libapps/apps/common/images/gc-md.gif'} alt="" style="width:30px; object-fit: cover; margin-right: 10px; border-radius: 4px;">
+				<span class="rvt-flex rvt-flex-column rvt-items-start">
+					${page.title}
+					${ page.isHidden ? 
+						html`
+						<span class="rvt-badge rvt-badge--secondary rvt-flex rvt-flex-row rvt-items-center rvt-color-black rvt-text-medium">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" title="Hidden Page" style="fill:currentColor; aspect-ratio:1; height:15px; width: 15px; object-fit: cover; margin-right: 5px; border-radius: 4px;"><path d="M320 400c-75.85 0-137.25-58.71-142.9-133.11L72.2 185.82c-13.79 17.3-26.48 35.59-36.72 55.59a32.35 32.35 0 0 0 0 29.19C89.71 376.41 197.07 448 320 448c26.91 0 52.87-4 77.89-10.46L346 397.39a144.13 144.13 0 0 1-26 2.61zm313.82 58.1l-110.55-85.44a331.25 331.25 0 0 0 81.25-102.07 32.35 32.35 0 0 0 0-29.19C550.29 135.59 442.93 64 320 64a308.15 308.15 0 0 0-147.32 37.7L45.46 3.37A16 16 0 0 0 23 6.18L3.37 31.45A16 16 0 0 0 6.18 53.9l588.36 454.73a16 16 0 0 0 22.46-2.81l19.64-25.27a16 16 0 0 0-2.82-22.45zm-183.72-142l-39.3-30.38A94.75 94.75 0 0 0 416 256a94.76 94.76 0 0 0-121.31-92.21A47.65 47.65 0 0 1 304 192a46.64 46.64 0 0 1-1.54 10l-73.61-56.89A142.31 142.31 0 0 1 320 112a143.92 143.92 0 0 1 144 144c0 21.63-5.29 41.79-13.9 60.11z"/></svg>
+						Hidden Page
+						</span>` : 
+						nothing
+					}
+				</span>
+				
+				
 			</h2>
 
 			${page.violations.length > 0 || initialViolationCounts.has(page.title) ? html`
@@ -114,6 +157,7 @@ export function renderDetailView({
 					const criticalCount = groupedViolations.critical.length;
 					const requiredCount = groupedViolations.required.length;
 					const checkCount = groupedViolations.check.length;
+					const hiddenCount = groupedViolations.hidden.length;
 					const currentTotal = criticalCount + requiredCount + checkCount;
 					
 					// Get initial counts and calculate resolved violations
@@ -155,16 +199,23 @@ export function renderDetailView({
 												<span>Check</span>
 											</td>
 										` : nothing}
-										${resolvedTotal > 0 ? html`
+										${hiddenCount > 0 ? html`
+											<td style="--size: calc(${hiddenCount} / ${grandTotal}); --color: var(--rvt-color-purple-100);">
+												<span style="color: var(--rvt-color-purple-700)">${hiddenCount}</span>
+												<span>Hidden</span>
+											</td>
+										` : nothing}
+										${/* resolvedTotal > 0 ? html`
 											<td style="--size: calc(${resolvedTotal} / ${grandTotal}); --color: #27ae60;">
 												<span style="color: var(--resolved-dark)">${resolvedTotal}</span>
 												<span>Resolved</span>
 											</td>
-										` : nothing}
+										` : nothing */
+										nothing }
 									</tr>
 								</tbody>
 							</table>
-							${resolvedTotal > 0 ? html`<p style="margin: 8px 0 0 0; font-size: 12px; color: #27ae60; font-weight: 500;">Progress: ${Math.round((resolvedTotal / (currentTotal + resolvedTotal)) * 100)}% resolved</p>` : nothing}
+							${ /* resolvedTotal > 0 ? html`<p style="margin: 8px 0 0 0; font-size: 12px; color: #27ae60; font-weight: 500;">Progress: ${Math.round((resolvedTotal / (currentTotal + resolvedTotal)) * 100)}% resolved</p>` : nothing */ nothing}
 						</div>
 					`;
 				})()}
@@ -181,6 +232,7 @@ export function renderDetailView({
 						${renderViolationGroup(groupedViolations.critical, 'Critical')}
 						${renderViolationGroup(groupedViolations.required, 'Required')}
 						${renderViolationGroup(groupedViolations.check, 'Check')}
+						${renderViolationGroup(groupedViolations.hidden, 'In a Hidden Box')}
 						${renderViolationGroup(groupedViolations.unknown, 'Unknown')}
 					`}
 				</div>
