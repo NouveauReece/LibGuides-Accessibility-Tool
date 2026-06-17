@@ -24,7 +24,7 @@ function loadGtagScript() {
 		script.async = true;
 		script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
 		document.head.appendChild(script);
-
+		
 		// Initialise gtag
 		window.dataLayer = window.dataLayer || [];
 		function gtag() { window.dataLayer.push(arguments); }
