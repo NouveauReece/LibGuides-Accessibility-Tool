@@ -35,9 +35,10 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '');
 
     <main id="main-content" class="rvt-layout__wrapper rvt-layout__wrapper--details">
         
-        <div class="rvt-layout__sidebar [ rvt-p-top-xxl rvt-p-left-md rvt-bg-black-000 ]" id="section-nav">
+        <div class="rvt-layout__sidebar [ rvt-p-top-lg rvt-p-left-md ]" id="section-nav">
             <nav class="rvt-sidenav" aria-labelledby="sidenav-label" data-rvt-sidenav>
-                <span class="rvt-sidenav__label" id="sidenav-label">Documentation</span>
+                <img class="rvt-p-bottom-lg" src="/favicon.svg" alt=""></img>
+                <span class="rvt-sidenav__label rvt-color-blue" id="sidenav-label">Documentation</span>
                 <SideNav nodes={sidebarTree} currentPath={currentPath} />
             </nav>
         </div>
@@ -76,5 +77,18 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '');
     :global(pre) {
         border-radius: .5rem;
         padding: .5rem;
+    }
+
+    :global(.rvt-sidenav__link[aria-current=page]) {
+        background-color: var(--rvt-color-blue-100);
+    }
+
+    :global(.rvt-sidenav__link[aria-current=page]::before) {
+        background-color: var(--rvt-color-blue-500);
+    }
+
+    .rvt-layout__sidebar {
+        background: linear-gradient(transparent, white 350px), radial-gradient(80.99% 100% at 50% 0%,rgb(128,128,128) 0%,rgb(91,91,128) 100%),radial-gradient(50% 123.47% at 50% 50%,rgb(239,231,200) 0%,rgb(91,91,128) 100%),linear-gradient(301.28deg,rgb(128,190,255) 0%,rgb(178,228,208) 100%),linear-gradient(294.84deg,rgb(178,180,228) 0%,rgb(180,128,180) 100%),linear-gradient(52.29deg,rgb(0,0,0) 0%,rgb(128,255,178) 100%),radial-gradient(100% 138.69% at 100% 0%,rgb(64,64,165) 0%,rgb(228,140,64) 100%),radial-gradient(70.41% 100% at 50% 0%,rgb(190,178,64) 0%,rgb(80,64,170) 100%);
+        background-blend-mode: screen, screen, lighten, overlay, lighten, difference, normal;
     }
 </style>

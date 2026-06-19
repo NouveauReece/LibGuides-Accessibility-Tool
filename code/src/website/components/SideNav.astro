@@ -22,6 +22,7 @@ function containsCurrentPath(node: SidebarNode, path: string): boolean {
 }
 ---
 
+
 <ul class="rvt-sidenav__list" data-rvt-sidenav-list={toggleAttribute || undefined} hidden={!isOpen}>
   {nodes.map((node) => {
     const isCurrent = node.href === currentPath;
