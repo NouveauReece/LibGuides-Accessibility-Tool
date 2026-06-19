@@ -1,0 +1,30 @@
+---
+import { getCollection, render } from 'astro:content';
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import DocumentationLayout from '../../layouts/DocumentationLayout.astro';
+
+dayjs.extend(utc);
+
+export async function getStaticPaths() {
+  const docs = await getCollection('docs');
+
+  return docs.map(entry => {
+    const id = entry.id === 'index' ? undefined : entry.id;
+
+    return {
+      params: { id },
+      props: { entry }
+    };
+  });
+}
+
+const { entry } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await render(entry);
+const lastModified = dayjs(remarkPluginFrontmatter.lastModified).utc().format("DD MMMM YYYY • HH:mm UTC");
+---
+
+<DocumentationLayout entry={entry} date={lastModified}>
+  <Content></Content>
+
+</DocumentationLayout>

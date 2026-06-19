@@ -1,0 +1,80 @@
+---
+import PrimaryNav from '../components/PrimaryNav.astro'
+import SideNav from '../components/SideNav.astro';
+import Footer from '../components/Footer.astro';
+import { getCollection } from 'astro:content';
+import { buildSidebarTree } from '../../../scripts/build-docs-sidebar';
+import CONFIG from '../../bookmarklet/config.json' with { type: 'json' };
+
+interface Props {
+  entry: any;
+  date: String;
+}
+
+const docs = await getCollection('docs');
+const sidebarTree = buildSidebarTree(docs);
+const currentPath = Astro.url.pathname.replace(/\/$/, '');
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<title>{Astro.props.entry.data.title} | {CONFIG.title} | {CONFIG.institution} {CONFIG.department}</title>
+        <meta name="title" content={CONFIG.title}>
+        <meta name="description" content="Discover known accessibility violations on LibGuides pages and correct them">
+        <meta name="keywords" content="accessibility, libguides, IU, indiana university, libraries">
+        <meta name="robots" content="noindex, nofollow">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="language" content="English">
+		<link rel="stylesheet" href="https://unpkg.com/rivet-core@latest/css/rivet.min.css">
+	</head>
+    <PrimaryNav currentPage="docs"></PrimaryNav>
+
+    <main id="main-content" class="rvt-layout__wrapper rvt-layout__wrapper--details">
+        
+        <div class="rvt-layout__sidebar [ rvt-p-top-xxl rvt-p-left-md rvt-bg-black-000 ]" id="section-nav">
+            <nav class="rvt-sidenav" aria-labelledby="sidenav-label" data-rvt-sidenav>
+                <span class="rvt-sidenav__label" id="sidenav-label">Documentation</span>
+                <SideNav nodes={sidebarTree} currentPath={currentPath} />
+            </nav>
+        </div>
+
+        <div class="rvt-layout__content [ rvt-p-top-xxl rvt-p-lr-md rvt-p-lr-xxl-md-up ] rvt-prose rvt-flow">
+            <h1 class="rvt-m-top-xs">{Astro.props.entry.data.title}</h1>
+            <p class="rvt-ts-20 rvt-color-black-500">{Astro.props.entry.data.description}</p>
+            <div class="rvt-prose rvt-flow rvt-border-top rvt-p-top-lg rvt-m-top-xl">
+                <p>Last Modified: {Astro.props.date}</p>
+                <slot></slot>
+            </div>
+        </div>
+    </main>
+
+    <Footer></Footer>
+
+    <script src="https://unpkg.com/rivet-core@2.9.1/js/rivet.min.js" is:inline></script>
+    <script is:inline>Rivet.init();</script>
+
+  </body>
+</html>
+
+
+<style>
+    main {
+        min-height: calc(100svh - 335px);
+    }
+    :global(pre .rvt-code), :global(.rvt-prose pre  :where(code)) {
+        color: unset;
+        background-color: unset;
+        display: unset;
+        padding: unset;
+        border-radius: unset;  
+    }
+
+    :global(pre) {
+        border-radius: .5rem;
+        padding: .5rem;
+    }
+</style>

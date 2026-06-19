@@ -17,11 +17,15 @@
     "test": "echo hi"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^7.2.0",
+    "@astrojs/mdx": "^6.0.3",
     "@astrojs/starlight": "^0.39.2",
     "astro": "^6.3.1",
+    "dayjs": "^1.11.21",
     "lit": "^3.3.3",
     "rivet-core": "^2.9.1",
-    "rivet-icons": "^3.0.1"
+    "rivet-icons": "^3.0.1",
+    "shiki": "^4.2.0"
   },
   "devDependencies": {
     "axe-core": "^4.11.4",

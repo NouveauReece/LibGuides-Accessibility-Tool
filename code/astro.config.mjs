@@ -1,29 +1,23 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import { unified } from '@astrojs/markdown-remark';
+import { remarkModifiedTime } from './scripts/remark-modified-time';
 import CONFIG from './src/bookmarklet/config.json' with { type: 'json' };
-import starlight from '@astrojs/starlight'; // Documentation
+import mdx from '@astrojs/mdx';
 
-// https://astro.build/config
 export default defineConfig({
   site: CONFIG.website,
   srcDir: './src/website',
   outDir: 'dist-website',
-  integrations: [
-    starlight({
-      title: `${CONFIG.title} Docs`,
-      logo: {
-        src: '/public/favicon.svg',
-      },
-      sidebar: [
-        {
-          label: 'Docs',
-          items: [{ autogenerate: { directory: 'docs' } }],
-        },
-      ],
-      routeMiddleware: './src/docsRouteMiddleware.mjs',
-      social: [
-        { icon: 'github', label: 'GitHub', href: CONFIG.github },
-      ],
-    }),
-  ]
-})
+  markdown: {
+    syntaxHighlight: 'shiki',
+    shikiConfig: {
+      theme: 'dark-plus',
+      wrap: true,
+    },
+    processor: unified({
+      remarkPlugins: [remarkModifiedTime],
+    })
+  },
+  integrations: [mdx()],
+});

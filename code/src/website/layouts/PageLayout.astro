@@ -23,7 +23,7 @@ interface Props {
 		<link rel="stylesheet" href="https://unpkg.com/rivet-core@latest/css/rivet.min.css">
 	</head>
 	<body>
-		<PrimaryNav></PrimaryNav>
+		<PrimaryNav currentPage={Astro.props.title.toLowerCase()}></PrimaryNav>
         <slot></slot>
 		<Footer></Footer>
 	</body>

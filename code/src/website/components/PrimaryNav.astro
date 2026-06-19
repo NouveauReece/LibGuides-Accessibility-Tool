@@ -1,12 +1,12 @@
 ---
-const { ...rest } = Astro.props
+const { currentPage, ...rest } = Astro.props
 import CONFIG from '../../bookmarklet/config.json' with { type: 'json' };
 
 ---
 <header class="rvt-header-wrapper">
   <a class="rvt-header-wrapper__skip-link" href="#main-content">Skip to main content</a>
   <div class="rvt-header-global">
-    <div class="rvt-container-xl">
+    <div class="rvt-p-lr-md">
       <div class="rvt-header-global__inner">
         <div class="rvt-header-global__logo-slot">
           <a class="rvt-lockup" href="/">
@@ -32,17 +32,17 @@ import CONFIG from '../../bookmarklet/config.json' with { type: 'json' };
             <nav aria-label="Main" class="rvt-header-menu" data-rvt-disclosure-target="menu" hidden>
               <ul class="rvt-header-menu__list">
                 
-                <li class="rvt-header-menu__item">
-                  <a class="rvt-header-menu__link" href="/">Home</a>
+                <li class={currentPage == 'home' ? "rvt-header-menu__item rvt-header-menu__item--current" : "rvt-header-menu__item"}>
+                  <a class="rvt-header-menu__link" href="/" >Home</a>
                 </li>
-                <li class="rvt-header-menu__item">
+                <li class={currentPage == 'docs' ? "rvt-header-menu__item rvt-header-menu__item--current" : "rvt-header-menu__item"}>
                   <a class="rvt-header-menu__link" href="/docs">Documentation</a>
                 </li>
-                <li class="rvt-header-menu__item">
+                <li class={currentPage == 'feedback' ? "rvt-header-menu__item rvt-header-menu__item--current" : "rvt-header-menu__item"}>
                   <a class="rvt-header-menu__link" href="/feedback">Feedback</a>
                 </li>
                 <!-- Navigation link marked as the current page -->
-                <li class="rvt-header-menu__item">
+                <li class={currentPage == 'install' ? "rvt-header-menu__item rvt-header-menu__item--current" : "rvt-header-menu__item"}>
                   <a class="rvt-button rvt-button--small" href="/install">Install</a>
                 </li> 
                 <li>
@@ -59,3 +59,8 @@ import CONFIG from '../../bookmarklet/config.json' with { type: 'json' };
     </div>
   </div>
 </header>
+
+
+<style>
+  .rvt-header-menu__item--current::after { bottom: -1.37rem; }
+</style>

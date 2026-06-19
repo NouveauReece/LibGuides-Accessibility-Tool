@@ -1,5 +1,6 @@
 ---
-title: Codebase Structure
+title: "Codebase Structure"
+description: "Welcome to our documentation"
 ---
 
 ## Directories
@@ -9,7 +10,7 @@ The codebase separates the bookmarklet code, documentation code, and notes into 
 * `./notes`: accessibility and implementation notes
 
 Here's a directory tree for reference (some files were removed for clarity):
-```
+```js
 .
 ├── code
 │   └── src
@@ -25,7 +26,7 @@ Additionally, there are different config files:
 * `tsconfig.json`: typescript config
 * `package.json`: npm dependencies and scripts
 
-```
+```js
 .
 ├── code
 │   ├── astro.config.mjs
@@ -36,13 +37,14 @@ Additionally, there are different config files:
 └── notes
 ```
 
+
 ## Output Build Directories 
 Additionally, the output files and directories are (intuitively) dependent on what is being built:
 * `dist-bookmarklet/bookmarklet.js`: the raw JS bookmarklet bundle
 * `dist-bookmarklet/bookmarklet.txt`: the `javascript:` prefixed string for pasting into the bookmark URL
 * `dist`: the output directory for documentation/non-bookmarklet content
 
-```
+```js
 .
 ├── code
 │   ├── dist-bookmarklet
