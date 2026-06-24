@@ -92,7 +92,7 @@ export function trackBookmarkletOpened() {
  * Tracks scan completion
  * @param {object} scanSummary - Summary of violations
  *   {
- *     violationsByImpact: {critical: 0, serious: 0, moderate: 0, minor: 0, check: 0},
+ *     violationsByImpact: {critical: 0, serious: 0, moderate: 0, minor: 0, quality: 0},
  *     topViolationRuleIds: ['rule-1', 'rule-2', ...],
  *     pageCount: 1,
  *     guideTitle: 'Guide Name',
@@ -115,7 +115,7 @@ export function trackScanCompleted(scanSummary) {
 		serious_violations: violationsByImpact.serious || 0,
 		moderate_violations: violationsByImpact.moderate || 0,
 		minor_violations: violationsByImpact.minor || 0,
-		check_violations: violationsByImpact.check || 0,
+		quality_violations: violationsByImpact.quality || 0,
 		top_violation_rules: topViolationRuleIds.slice(0, 5).join(','),
 		page_count: pageCount,
 		guide_title: guideTitle,

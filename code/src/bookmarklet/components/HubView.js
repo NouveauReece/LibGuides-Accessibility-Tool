@@ -23,7 +23,7 @@ export function renderHubView({
 						<tr>
 							<th>Page</th>
 							<th>Issues</th>
-							<th>Checks</th>
+							<th>Quality</th>
 						</tr>
 					</thead>
 
@@ -47,7 +47,7 @@ export function renderHubView({
 									<smart-badge value="${counts.issues}"></smart-badge>
 									</td>
 									<td>
-										<smart-badge value="${counts.checks}"></smart-badge>
+										<smart-badge value="${counts.quality}"></smart-badge>
 									</td>
 								`;
 								})()}
@@ -63,7 +63,7 @@ export function renderHubView({
 				<tr>
 					<th>Page</th>
 					<th>Issues</th>
-					<th>Checks</th>
+					<th>Quality</th>
 				</tr>
 			</thead>
 
@@ -89,7 +89,7 @@ export function renderHubView({
 						<smart-badge value="${counts.issues}"></smart-badge>
 						</td>
 						<td>
-							<smart-badge value="${counts.checks}"></smart-badge>
+							<smart-badge value="${counts.quality}"></smart-badge>
 						</td>
 					`;
 					})()}

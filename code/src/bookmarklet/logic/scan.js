@@ -29,7 +29,7 @@ export async function scanPages(pages) {
                 serious: 0,
                 moderate: 0,
                 minor: 0,
-                check: 0
+                quality: 0
             };
             
             results.forEach(page => {

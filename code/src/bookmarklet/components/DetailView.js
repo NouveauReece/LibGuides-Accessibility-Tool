@@ -7,7 +7,7 @@ import { getAccessibleName } from "../logic/getAccessibleName.js"
 const SEVERITY_ICONS = {
 	critical: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-crimson-500)" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7 1h2V4H7zm2 2a1 1 0 1 0-2 0 1 1 0 0 0 2 0"/></svg>`, varPrefix: '--critical' },
 	required: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#996400" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7-3a1 1 0 1 0 2 0 1 1 0 0 0-2 0m2 2H7v5h2z"/></svg>`, varPrefix: '--required' },
-	check: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-purple-700)" aria-hidden="true"><path d="M1 7h10.844L7.737 2.146 9.263.854 15.31 8l-6.047 7.146-1.526-1.292L11.844 9H1z"/></svg>`, varPrefix: '--check' },
+	quality: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-purple-700)" aria-hidden="true"><path d="M1 7h10.844L7.737 2.146 9.263.854 15.31 8l-6.047 7.146-1.526-1.292L11.844 9H1z"/></svg>`, varPrefix: '--quality' },
 	unknown: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-black-600)" aria-hidden="true"><path d="M4 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0m6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 2a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/></svg>`, varPrefix: '--unknown' },
 	hidden: { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--rvt-color-black-600)" aria-hidden="true"><path d="M4 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0m6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 2a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/></svg>`, varPrefix: '--unknown' }
 };
@@ -46,7 +46,7 @@ export function renderDetailView({
 	const groupedViolations = {
 		critical: [],
 		required: [],
-		check: [],
+		quality: [],
 		hidden: [],
 		unknown: []
 	};
@@ -156,23 +156,23 @@ export function renderDetailView({
 				${(() => {
 					const criticalCount = groupedViolations.critical.length;
 					const requiredCount = groupedViolations.required.length;
-					const checkCount = groupedViolations.check.length;
+					const qualityCount = groupedViolations.quality.length;
 					const hiddenCount = groupedViolations.hidden.length;
-					const currentTotal = criticalCount + requiredCount + checkCount;
+					const currentTotal = criticalCount + requiredCount + qualityCount;
 					
 					// Get initial counts and calculate resolved violations
-					const initialCounts = initialViolationCounts.get(page.title) || { critical: 0, required: 0, check: 0 };
+					const initialCounts = initialViolationCounts.get(page.title) || { critical: 0, required: 0, quality: 0 };
 					const resolvedCritical = Math.max(0, initialCounts.critical - criticalCount);
 					const resolvedRequired = Math.max(0, initialCounts.required - requiredCount);
-					const resolvedCheck = Math.max(0, initialCounts.check - checkCount);
-					const resolvedTotal = resolvedCritical + resolvedRequired + resolvedCheck;
+					const resolvedquality = Math.max(0, initialCounts.quality - qualityCount);
+					const resolvedTotal = resolvedCritical + resolvedRequired + resolvedquality;
 					
 					const grandTotal = currentTotal + resolvedTotal;
 					if (grandTotal === 0) return nothing;
 					
 					const criticalPercent = (criticalCount / grandTotal) * 100;
 					const requiredPercent = (requiredCount / grandTotal) * 100;
-					const checkPercent = (checkCount / grandTotal) * 100;
+					const qualityPercent = (qualityCount / grandTotal) * 100;
 					const resolvedPercent = (resolvedTotal / grandTotal) * 100;
 					
 					return html`
@@ -193,10 +193,10 @@ export function renderDetailView({
 												<span>Required</span>
 											</td>
 										` : nothing}
-										${checkCount > 0 ? html`
-											<td style="--size: calc(${checkCount} / ${grandTotal}); --color: var(--rvt-color-purple-100);">
-												<span style="color: var(--rvt-color-purple-700)">${checkCount}</span>
-												<span>Check</span>
+										${qualityCount > 0 ? html`
+											<td style="--size: calc(${qualityCount} / ${grandTotal}); --color: var(--rvt-color-purple-100);">
+												<span style="color: var(--rvt-color-purple-700)">${qualityCount}</span>
+												<span>Quality</span>
 											</td>
 										` : nothing}
 										${hiddenCount > 0 ? html`
@@ -231,7 +231,7 @@ export function renderDetailView({
 					` : html`
 						${renderViolationGroup(groupedViolations.critical, 'Critical')}
 						${renderViolationGroup(groupedViolations.required, 'Required')}
-						${renderViolationGroup(groupedViolations.check, 'Check')}
+						${renderViolationGroup(groupedViolations.quality, 'Quality')}
 						${renderViolationGroup(groupedViolations.hidden, 'In a Hidden Box')}
 						${renderViolationGroup(groupedViolations.unknown, 'Unknown')}
 					`}

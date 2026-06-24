@@ -221,7 +221,7 @@ class BookmarkletFrame extends LitElement {
 					const severity = getViolationSeverity(v);
 					acc[severity.type] = (acc[severity.type] || 0) + 1;
 					return acc;
-				}, { critical: 0, required: 0, check: 0, unknown: 0 });
+				}, { critical: 0, required: 0, quality: 0, unknown: 0 });
 				this._initialViolationCounts.set(page.title, counts);
 			});
 			this._axeLoaded = true;
@@ -397,21 +397,21 @@ class BookmarkletFrame extends LitElement {
 	getCounts = (page) => {
 		let critical = 0;
 		let required = 0;
-		let check = 0;
+		let quality = 0;
 
 		page.violations.forEach(v => {
 			if (v.impact === 'critical' || v.impact === 'serious') {
 			critical++;
 			} else if (v.impact === 'moderate' || v.impact === 'minor') {
 			required++;
-			} else if (v.impact === 'check') {
-			check++;
+			} else if (v.impact === 'quality') {
+			quality++;
 			}
 		});
 
 		return {
 			issues: critical + required,
-			checks: check
+			quality: quality
 		};
 	};
 	
