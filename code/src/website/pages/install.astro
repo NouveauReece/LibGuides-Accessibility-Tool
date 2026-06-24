@@ -2,34 +2,109 @@
 import PageLayout from "../layouts/PageLayout.astro"
 import CONFIG from '../../bookmarklet/config.json' with { type: 'json' };
 import bookmarkletContent from '../../../dist-bookmarklet/bookmarklet-mini.js?raw';
+import { Image } from "astro:assets";
+import libguidesScreenshot from "../assets/libguide_example.webp";
 const BOOKMARKLET_URL_ENCODED = encodeURI(bookmarkletContent.trim());
 ---
 
 <PageLayout title="Install">
 
-    <main id="main-content" class="rvt-layout__wrapper rvt-layout__wrapper--single rvt-container-sm">
-        <div class="rvt-layout__content">
+    <main id="main-content" class="rvt-layout__wrapper">
 
-            <div class="rvt-p-all-md">
-                <h1 class="rvt-ts-32 rvt-text-center rvt-text-medium rvt-m-top-md">Install the {CONFIG.title}</h1>
-                <p class="rvt-ts-18 rvt-text-center">Click-and-Drag the Bookmarklet below into your Bookmarks Bar</p>
-                <!-- <p>Don't see a Bookmarks Bar? Press <kbd>Command/Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd></p> -->
-                
-                <a class="install-btn rvt-button rvt-button--secondary rvt-flex rvt-flex-column rvt-items-center rvt-justify-center rvt-p-all-md rvt-m-top-xl rvt-m-bottom-none rvt-text-center" href={BOOKMARKLET_URL_ENCODED}>
-                    <img src="/favicon.svg" alt="">
-                    <p>{CONFIG.title}</p>
-                </a>
+        <!-- Step 1: Drag and Drop -->
+        <div class="rvt-hero rvt-m-b-md">
+            <div class="rvt-container-lg">
+                <div class="rvt-hero__inner">
+                    <div class="rvt-hero__body [ rvt-flow ]">
 
-            </div>
-
-
-            <div class="rvt-flex rvt-justify-center rvt-p-tb-xxl rvt-m-tb-lg rvt-flow rvt-prose rvt-bg-black-000 rvt-border-radius ">
-                <div class="rvt-container-sm rvt-flex rvt-items-center rvt-p-lr-xxl">
-                    <div class="rvt-p-left-xl-md-up rvt-flow rvt-prose">
-                        <h2>Next Steps</h2>
-                        <p>Visit </p>
-                        <a class="rvt-cta" href="/docs">How to Use the Tool</a>
+                        <div class="rvt-prose rvt-m-bottom-xxl">
+                            <h1 class="rvt-hero__title rvt-ts-xl rvt-text-bold">Install the {CONFIG.title}</h1>
+                        </div>
+                        
+                        <h2>
+                            <span class="rvt-hero__eyebrow">Step 1: Install </span>
+                            <span class="rvt-hero__title rvt-ts-lg rvt-ts-lg">Drag into Bookmarks Bar</span>
+                        </h2>
+                        <div class="rvt-prose">
+                            <div class="rvt-hero__teaser">
+                                <p>Click-and-Drag the Bookmarklet button below into your browser's Bookmarks Bar. Don't see your Bookmarks Bar? Press <code><kbd>Command/Ctrl</kbd></code> + <code><kbd>Shift</kbd></code> + <code><kbd>B</kbd></code></p>
+                                <p>If you cannot or do not use a mouse or pointer input device, visit the <a href="/docs/no-mouse-install">No-Mouse Install page</a></p>
+                            </div>
+                            <div class="rvt-hero__actions rvt-flex rvt-flex-column rvt-items-center rvt-justify-center">
+                                <a class="install-btn rvt-button rvt-button--secondary rvt-flex rvt-flex-column rvt-items-center rvt-justify-center rvt-p-all-md rvt-m-top-md rvt-m-bottom-none rvt-text-center" href={BOOKMARKLET_URL_ENCODED}>
+                                    <img src="/favicon.svg" alt="">
+                                    <p>{CONFIG.title}</p>
+                                </a>
+                            </div>
+                        </div>
                     </div>
+                    <div class="rvt-hero__media">
+                        <video aria-hidden="true" id="installVideo" style="width:100%; border-radius: .5rem;" muted playsinline loop></video>
+                        <!-- <div class="rvt-hero__media-caption">An optional image caption</div> -->
+                    </div>
+
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Visit LibGuides -->
+        <div class="rvt-hero rvt-m-tb-md">
+            <div class="rvt-container-lg">
+                <div class="rvt-hero__inner">
+                    <div class="rvt-hero__body [ rvt-flow ]">
+                        <h2>
+                            <span class="rvt-hero__eyebrow">Step 2: LibGuides </span>
+                            <span class="rvt-hero__title rvt-ts-lg">Visit a LibGuide</span>
+                        </h2>
+                        <div class="rvt-prose">
+                            <div class="rvt-hero__teaser">
+                                <p>Navigate to LibGuides page in either public or admin view to check it's accessibility</p>
+                            </div>
+                            <div class="rvt-hero__actions rvt-flex rvt-flex-column rvt-items-center rvt-justify-center">
+                                <a class="rvt-button" href={CONFIG['libguides-url-user']} target="_blank">
+                                    Visit LibGuides
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rvt-hero__media">
+                        <Image src={libguidesScreenshot} alt=""></Image>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Scan -->
+        <div class="rvt-hero rvt-m-tb-md">
+            <div class="rvt-container-lg">
+                <div class="rvt-hero__inner">
+                    <div class="rvt-hero__body [ rvt-flow ]">
+                        <h2>
+                            <span class="rvt-hero__eyebrow">Step 3: Scan </span>
+                            <span class="rvt-hero__title rvt-ts-lg">Click Tool to Scan</span>
+                        </h2>
+                        <div class="rvt-prose">
+                            <div class="rvt-hero__teaser">
+                                <p>Click the {CONFIG.title} in your browser's bookmarks bar to start an accessibility scan</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rvt-hero__media">
+                        <video  aria-hidden="true" src="/install_videos/accessibility_scan.mp4" style="width:100%; border-radius: .5rem;" autoplay muted playsinline loop></video>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="rvt-flex rvt-justify-center rvt-p-tb-xxl rvt-m-tb-lg rvt-flow rvt-prose">
+            <div class="rvt-container-sm rvt-p-lr-xxl">
+                <div class="rvt-p-left-xl-md-up rvt-text-center rvt-flow rvt-prose rvt-flex rvt-flex-column rvt-items-center rvt-justify-center ">
+                    <h2>Done! Time to Check those Pages.</h2>
+                    <p>Now you're ready to begin scanning your LibGuides pages and make edits to remedy accessibility violations. Looking for more? Check out our documentation for how to use the tool, best practices, and how to contribute.</p>
+                    <a class="rvt-cta rvt-cta--button" href="/docs">Read Documentation</a>
                 </div>
             </div>
         </div>
@@ -44,10 +119,35 @@ const BOOKMARKLET_URL_ENCODED = encodeURI(bookmarkletContent.trim());
         height: max-content;
         justify-self: center;
     }
+
+    #main-content > :first-child {
+        background: linear-gradient(transparent, white 350px), radial-gradient(80.99% 100% at 50% 0%,rgb(128,128,128) 0%,rgb(91,91,128) 100%),radial-gradient(50% 123.47% at 50% 50%,rgb(239,231,200) 0%,rgb(91,91,128) 100%),linear-gradient(301.28deg,rgb(128,190,255) 0%,rgb(178,228,208) 100%),linear-gradient(294.84deg,rgb(178,180,228) 0%,rgb(180,128,180) 100%),linear-gradient(52.29deg,rgb(0,0,0) 0%,rgb(128,255,178) 100%),radial-gradient(100% 138.69% at 100% 0%,rgb(64,64,165) 0%,rgb(228,140,64) 100%),radial-gradient(70.41% 100% at 50% 0%,rgb(190,178,64) 0%,rgb(80,64,170) 100%);
+        background-blend-mode: screen, screen, lighten, overlay, lighten, difference, normal;
+    }
 </style>
 
 <script lang="js">
+    document.addEventListener("DOMContentLoaded", function () {
+        const vid = document.getElementById("installVideo");
+        
+        if (/constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && window['safari'].pushNotification))) {
+            // safari
+            vid.src = '/install_videos/install_safari.mp4';
+        } else if (typeof InstallTrigger !== 'undefined') {
+            // firefox
+            vid.src = '/install_videos/install_firefox.mp4';
+        } else {
+            // chrome or generic
+            vid.src = '/install_videos/install_chrome.mp4';
+        }
+
+        vid.load();
+        vid.play();
+    });
+
     document.querySelector('.install-btn').addEventListener('click', (e) => {
         e.preventDefault()
     })
+
+    
 </script>

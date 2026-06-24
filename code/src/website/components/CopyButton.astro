@@ -1,0 +1,44 @@
+---
+interface Props {
+    label: string;
+    copyFrom?: string;
+    copySrc?: string;
+}
+
+const { label, copyFrom, copySrc } = Astro.props;
+---
+<div>
+    <button class="rvt-button">{label}</button>
+</div>
+
+<script>
+
+    document.querySelector('button')?.addEventListener("click", async (e) => {
+        console.log(e.target);
+        return await copy(e.target);
+    });
+
+    async function copy(btn) {
+        try {
+            let value = null;
+            if (btn.hasAttribute('copyFrom')) {
+                const el = document.querySelector(btn.getAttribute('copyFrom'));
+                value = el.innerText || el.innerHTML;
+                console.log(value);
+            } else {
+                value = btn.getAttribute('copySrc');
+                console.log(value);
+            }
+            await navigator.clipboard.writeText(value);
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+</script>
+
+<style>
+    div {
+        position: relative;
+    }
+</style>
