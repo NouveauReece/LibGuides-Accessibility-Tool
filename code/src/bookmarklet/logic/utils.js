@@ -45,10 +45,10 @@ export async function getPages() {
 
         let container;
         if (location.pathname.endsWith('admin_c.php')) {
-            container = doc.querySelector('#s-lg-guide-main') || doc.querySelector('#s-lg-content') || doc.body;
-            container.querySelectorAll('.s-lg-content-edit, .btn-group, .s-lg-guide-mini-cmd-bar, .s-lg-box-edit, .s-lib-box-edit, [id*="admin-edit"], .dropdown-toggle, div:has(> [id^="s-lg-admin-edit-content-link"])').forEach(el => el.remove());
+            container = doc.querySelector('#s-lg-side-nav-content') || doc.querySelector('#s-lg-content') || doc.body;
+            container.querySelectorAll('#s-lg-guide-tabs>.nav, .s-lg-content-edit, .btn-group, .s-lg-guide-mini-cmd-bar, .s-lg-box-edit, .s-lib-box-edit, [id*="admin-edit"], .dropdown-toggle, div:has(> [id^="s-lg-admin-edit-content-link"])').forEach(el => el.remove());
         } else {
-            container = doc.querySelector('#s-lg-guide-main') || doc.querySelector('#s-lg-content') || doc.body;
+            container = doc.querySelector('#s-lg-side-nav-content') || doc.querySelector('#s-lg-content') || doc.body;
         }
 
         // Find first image not from /libapps/apps/common
@@ -56,7 +56,7 @@ export async function getPages() {
         let image = null;
         for (const img of allImages) {
             const src = img.src || 'https://s3.amazonaws.com/libapps/apps/common/images/gc-md.gif';
-            if (!src.includes('/libapps/apps/common') && !src.includes('/icons')) {
+            if (!src.includes('/libapps/apps/common') && !src.includes('/icons') && !src.includes('/profiles/')) {
                 image = {
                     src: src,
                     alt: img.alt || '',
@@ -68,7 +68,6 @@ export async function getPages() {
         
         return { ...page, container, image }
     }))
-    console.log(pages);
     return pages;
 }
 

@@ -1,6 +1,5 @@
 export function getAccessibleName(target) {
     const el = document.querySelector(target);
-    console.log(el);
     if (!el) { return "[Can't Find Element]" }
 
     if (el.ariaDescribedByElements) {

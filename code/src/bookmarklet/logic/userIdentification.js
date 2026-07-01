@@ -24,8 +24,7 @@ function generateUUID() {
  */
 async function extractEmailFromLibApps() {
 	try {
-		console.log('[A11y] Attempting to extract email from LibApps...');
-		
+				
 		const response = await fetch('https://iub.libapps.com/libapps/account', {
 			method: 'GET',
 			credentials: 'include', // Include cookies
@@ -48,12 +47,9 @@ async function extractEmailFromLibApps() {
 		if (emailMatch && emailMatch[1]) {
 			const email = emailMatch[1].trim();
 			if (email && email.includes('@')) {
-				console.log('[A11y] Email extracted from LibApps:', email);
 				return email;
 			}
 		}
-
-		console.log('[A11y] Email not found in LibApps response');
 		return null;
 	} catch (error) {
 		console.log('[A11y] Email extraction error:', error.message);

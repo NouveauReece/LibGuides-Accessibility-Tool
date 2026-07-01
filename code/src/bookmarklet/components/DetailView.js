@@ -20,7 +20,6 @@ function isViolationInHiddenBox(violation) {
 	for (const node of violation.nodes) {
 		try {
 			const element = document.querySelector(node.target);
-			console.log(element);
 			if (!element) continue;
 			
 			// Traverse up the DOM to find a parent .s-lib-box with a hidden indicator
@@ -40,7 +39,8 @@ export function renderDetailView({
 	highlightViolationElements,
 	backToHub,
 	highlightNode,
-	initialViolationCounts
+	initialViolationCounts,
+	isAdminView
 }) {
 
 	const groupedViolations = {
@@ -64,8 +64,6 @@ export function renderDetailView({
 
 	const renderViolationGroup = (violations, severity) => {
 		if (violations.length === 0) return nothing;
-
-		console.log(violations);
 
 		return html`
 			<div style="margin-bottom: 24px;">
@@ -91,13 +89,32 @@ export function renderDetailView({
 									<ul class="rvt-prose rvt-flow" style="padding:0;margin:0;">
 										${violation.nodes.map(node => html`
 											<li style="padding:0 0 5px 0; margin:0; list-style:none;">
-											<button @click=${() => highlightNode(node)} class="rvt-button rvt-button--secondary grid-btn" style="cursor: pointer; text-align: start" title="Click to highlight this element on the page">
-												<svg style="grid-area: icon;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/><path d="m15.356 7.478.027.051.235.471-.236.47-.026.052a13 13 0 0 1-.464.794 14 14 0 0 1-1.399 1.853C12.303 12.492 10.427 14 8 14s-4.302-1.508-5.493-2.831A14 14 0 0 1 .644 8.522l-.027-.051L.382 8l.235-.47a6 6 0 0 1 .125-.232 14 14 0 0 1 1.765-2.467C3.697 3.508 5.573 2 8 2s4.302 1.508 5.493 2.831a14 14 0 0 1 1.863 2.647m-12.558.768c.276.436.68 1.013 1.195 1.585C5.053 11.008 6.427 12 8 12s2.948-.992 4.007-2.169A12 12 0 0 0 13.354 8a12 12 0 0 0-1.347-1.831C10.947 4.992 9.573 4 8 4s-2.948.992-4.007 2.169A12 12 0 0 0 2.646 8q.068.113.152.246"/></svg>
-												<p style="word-break: break-all; text-overflow: ellipsis; overflow: hidden;"><strong>${tagPrettyName[document.querySelector(node.target).tagName.toLowerCase()]}</strong>: ${getAccessibleName(node.target) || html`<em>[No Accessible Description]</em>`}</p>
-												<code class="rvt-font-mono rvt-ts-xxs" style="word-break: break-all; text-overflow: ellipsis; overflow: hidden;">
-													${node.html}
-												</code>
-											</button>
+											${ RULE_DEFINITIONS[violation.id]?.autoFixFunction && isAdminView ? 
+											html`
+												<div class="grid-btn-actions" style="text-align: start">
+													<p style="word-break: break-all; text-overflow: ellipsis; overflow: hidden; grid-area: pretty"><strong>${tagPrettyName[document.querySelector(node.target).tagName.toLowerCase()]}</strong>: ${getAccessibleName(node.target) || html`<em>[No Accessible Description]</em>`}</p>
+													<code class="rvt-font-mono rvt-ts-xxs" style="word-break: break-all; text-overflow: ellipsis; overflow: hidden; grid-area: node">
+														${node.html}
+													</code>
+													<button @click=${() => highlightNode(node)} class="rvt-button rvt-button--secondary" style="cursor: pointer; text-align: center; grid-area: btn1;" title="Click to highlight this element on the page">
+														<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/><path d="m15.356 7.478.027.051.235.471-.236.47-.026.052a13 13 0 0 1-.464.794 14 14 0 0 1-1.399 1.853C12.303 12.492 10.427 14 8 14s-4.302-1.508-5.493-2.831A14 14 0 0 1 .644 8.522l-.027-.051L.382 8l.235-.47a6 6 0 0 1 .125-.232 14 14 0 0 1 1.765-2.467C3.697 3.508 5.573 2 8 2s4.302 1.508 5.493 2.831a14 14 0 0 1 1.863 2.647m-12.558.768c.276.436.68 1.013 1.195 1.585C5.053 11.008 6.427 12 8 12s2.948-.992 4.007-2.169A12 12 0 0 0 13.354 8a12 12 0 0 0-1.347-1.831C10.947 4.992 9.573 4 8 4s-2.948.992-4.007 2.169A12 12 0 0 0 2.646 8q.068.113.152.246"/></svg>
+														View on Page
+													</button>
+													<button @click=${() => RULE_DEFINITIONS[violation.id]?.autoFixFunction(node)} class="rvt-button rvt-button--secondary" style="cursor: pointer; text-align: center; grid-area: btn2;" title="Click to highlight this element on the page">
+														<svg aria-hidden="true" fill="currentColor" focusable="false" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m4.261 13.49 6.614-10.822-1.707-1.043-5.43 8.885-2.394-1.916-1.25 1.562 4.167 3.334ZM16 3h-4v2h4V3Zm0 4h-6v2h6V7Zm0 4v2H8v-2h8Z"></path></svg>
+														Auto-Fix
+													</button>
+												</button>
+											` : html`
+												<button @click=${() => highlightNode(node)} class="rvt-button rvt-button--secondary grid-btn" style="cursor: pointer; text-align: start" title="Click to highlight this element on the page">
+													<svg style="grid-area: icon;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/><path d="m15.356 7.478.027.051.235.471-.236.47-.026.052a13 13 0 0 1-.464.794 14 14 0 0 1-1.399 1.853C12.303 12.492 10.427 14 8 14s-4.302-1.508-5.493-2.831A14 14 0 0 1 .644 8.522l-.027-.051L.382 8l.235-.47a6 6 0 0 1 .125-.232 14 14 0 0 1 1.765-2.467C3.697 3.508 5.573 2 8 2s4.302 1.508 5.493 2.831a14 14 0 0 1 1.863 2.647m-12.558.768c.276.436.68 1.013 1.195 1.585C5.053 11.008 6.427 12 8 12s2.948-.992 4.007-2.169A12 12 0 0 0 13.354 8a12 12 0 0 0-1.347-1.831C10.947 4.992 9.573 4 8 4s-2.948.992-4.007 2.169A12 12 0 0 0 2.646 8q.068.113.152.246"/></svg>
+													<p style="word-break: break-all; text-overflow: ellipsis; overflow: hidden;"><strong>${tagPrettyName[document.querySelector(node.target).tagName.toLowerCase()]}</strong>: ${getAccessibleName(node.target) || html`<em>[No Accessible Description]</em>`}</p>
+													<code class="rvt-font-mono rvt-ts-xxs" style="word-break: break-all; text-overflow: ellipsis; overflow: hidden;">
+														${node.html}
+													</code>
+												</button>
+											` }
+											
 											</li>
 											`)}
 									</ul>

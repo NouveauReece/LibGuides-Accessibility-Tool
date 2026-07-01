@@ -1,4 +1,26 @@
 import { trackScanCompleted } from './analytics.js';
+import { runCustomRules } from '../rules/index.js'
+
+export function deduplicateViolationNodes(violations = []) {
+    return violations.map((violation) => {
+        if (!Array.isArray(violation?.nodes) || violation.nodes.length <= 1) {
+            return violation;
+        }
+
+        const seenNodes = new Set();
+        const dedupedNodes = violation.nodes.filter((node) => {
+            const signature = JSON.stringify(node?.target || node);
+            if (seenNodes.has(signature)) {
+                return false;
+            }
+
+            seenNodes.add(signature);
+            return true;
+        });
+
+        return { ...violation, nodes: dedupedNodes };
+    });
+}
 
 export async function scanPages(pages) {
     try {
@@ -19,8 +41,12 @@ export async function scanPages(pages) {
         const results = []
         for (const page of pages) {
             const axeResults = await axe.run(page.container, axeOptions);
-            results.push({ ...page, violations: axeResults.violations })
+            const customRuleResults = await runCustomRules(page.container);
+            const combinedViolations = [...axeResults.violations, ...customRuleResults.violations];
+            results.push({ ...page, violations: deduplicateViolationNodes(combinedViolations) })
         }
+
+        console.log(results);
 
         // Track scan completion analytics
         try {

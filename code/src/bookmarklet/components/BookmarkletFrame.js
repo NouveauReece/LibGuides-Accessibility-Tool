@@ -8,6 +8,7 @@ import { getViolationSeverity } from '../logic/violationSeverity.js';
 import { renderHubView } from './HubView.js';
 import { renderDetailView } from './DetailView.js';
 import { renderUpdateView } from './UpdateView.js';
+import { RULE_DEFINITIONS } from '../rules/ruleDescriptions.js';
 import "./Loading.js";
 import "./SmartBadge.js";
 
@@ -148,6 +149,16 @@ class BookmarkletFrame extends LitElement {
 			grid-template-areas: "icon pretty" "icon node";
 			height: min-content;
 			padding: 5px;
+		}
+
+		.grid-btn-actions {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			grid-template-rows: repeat(3, auto);
+			grid-template-areas: "pretty pretty" "node node" "btn1 btn2";
+			height: min-content;
+			padding: 5px;
+			gap: 5px;
 		}
 
 		.charts-css td {
@@ -354,8 +365,6 @@ class BookmarkletFrame extends LitElement {
 	_highlightNode(node) {
 		this._clearHighlights();
 
-		console.log(node);
-
 		if (!node.target || node.target.length === 0) return;
 
 		const selector = node.target[0];
@@ -530,7 +539,8 @@ class BookmarkletFrame extends LitElement {
 			highlightViolationElements: (violation) => this._highlightViolationElements(violation),
 			backToHub: () => this._backToHub(),
 			highlightNode: (node) => this._highlightNode(node),
-			initialViolationCounts: this._initialViolationCounts
+			initialViolationCounts: this._initialViolationCounts,
+			isAdminView: new URL(CONFIG['libguides-url-admin']).hostname === new URL(window.location.href, window.location.origin).hostname
 		});
 	}
 }
